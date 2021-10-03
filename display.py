@@ -5,7 +5,7 @@ import socket
 DISPLAY_HOST = "192.168.0.107"
 DISPLAY_PORT = 5000
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((host, port))
+server_socket.bind((DISPLAY_HOST, DISPLAY_PORT))
 server_socket.listen(5)
 
 pygame.init()
