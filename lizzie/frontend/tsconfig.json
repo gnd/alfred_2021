@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+      "target": "ES2015",
+      "module": "es2020",
+      "lib": ["ES6", "DOM", "DOM.Iterable", "ScriptHost", "ES2019.Array"],
+      "moduleResolution": "node",
+      "declaration": false,
+      "noImplicitAny": true,
+      "strictNullChecks": true,
+      "jsx": "react",
+      "sourceMap": true,
+      "noLib": false,
+      "suppressImplicitAnyIndexErrors": true,
+      "allowSyntheticDefaultImports": true,
+      "resolveJsonModule": true,
+    },
+    "compileOnSave": false,
+    "exclude": ["node_modules"]
+}

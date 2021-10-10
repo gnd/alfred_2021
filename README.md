@@ -5,3 +5,5 @@ Code repository used to store utilities used during the 2021 performance rehears
 ## Directories
 
 * text-display: scripts to display text on the screen
+* speech-loop: converts real-time streams of speech into text
+* lizzie: web app for interacting with GPT-3

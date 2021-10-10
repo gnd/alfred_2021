@@ -1,0 +1,33 @@
+{
+  "name": "lizzie_x_alfred",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "snowpack dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@snowpack/plugin-typescript": "^1.2.1",
+    "axios": "^0.22.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "snowpack": "^3.8.3",
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {
+    "@snowpack/plugin-sass": "^1.4.0",
+    "@types/react": "^17.0.14",
+    "@types/react-dom": "^17.0.9",
+    "@typescript-eslint/eslint-plugin": "^4.28.4",
+    "@typescript-eslint/parser": "^4.28.4",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-react": "^7.24.0",
+    "prettier": "^2.3.2"
+  }
+}
