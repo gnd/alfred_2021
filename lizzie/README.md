@@ -1,6 +1,11 @@
 # Lizzie
 
+### Prerequisities
+`pip3 install fire flask openai`
+
+
 ### Building and running
-`cd frontend && npx snowpack build`
-then from the project root
+`cd frontend && npm install && npx snowpack build`
+
+Then from the project root:
 `python3 lizzie.py`

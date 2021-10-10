@@ -5,7 +5,8 @@ import ptext
 # set some globals
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
-DISPLAY_HOST = "192.168.0.107"
+# TODO - automaticaly detect wlan0 ip
+DISPLAY_HOST = "192.168.220.207"
 DISPLAY_PORT = 5000
 PADDING = 50 
 PADDING_TOP = 50 
