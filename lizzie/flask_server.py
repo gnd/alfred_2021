@@ -12,6 +12,8 @@ APP = Flask(__name__, static_folder="frontend/build/", template_folder="frontend
 MAX_TOKENS = 500
 TEMPERATURE = 0.9
 MODEL = "davinci"
+
+# TODO add apikey to config
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def logResponse(response):

@@ -4,10 +4,14 @@
 """
 
 import os
-import signal
-
 import fire
+import signal
+import configparser
 
+def load_config():
+    config = configparser.ConfigParser(interpolation=None)
+    config.read("lizzie.cfg")   # hardcoded for now
+    cookies = config.get('server', 'cookies').strip(';')
 
 def main(port=5000, public=False):
     """The application entrypoint
