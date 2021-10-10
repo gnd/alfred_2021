@@ -17,6 +17,7 @@ const App = (): JSX.Element => {
     const [responses, setResponses] = useState<Message[]>([]);
     const [isExpecting, setIsExpecting] = useState(false);
     const [temperature, setTemperature] = useState(90);
+    const [respLength, setRespLength] = useState(200);
 
     const setEngine = (engine: string) =>
         axios.post("/engine", { engine: engine });
@@ -24,6 +25,10 @@ const App = (): JSX.Element => {
     useEffect(() => {
         axios.post("/temperature", { temperature: temperature });
     }, [temperature]);
+
+    useEffect(() => {
+        axios.post("/max_tokens", { max_tokens: respLength });
+    }, [respLength]);
 
     const isInputEmpty = textInput.trim().length === 0;
     const sendMsg = () => {
@@ -102,6 +107,19 @@ const App = (): JSX.Element => {
                                 Davinci Instruct Beta
                             </option>
                         </select>
+                    </div>
+                    <div className="slidecontainer">
+                        <label>words {respLength}</label>
+                        <input
+                            type="range"
+                            min="20"
+                            max="2000"
+                            value={respLength}
+                            className="slider"
+                            onChange={(e) =>
+                                setRespLength(Number(e.target.value))
+                            }
+                        />
                     </div>
                 </div>
                 <div>

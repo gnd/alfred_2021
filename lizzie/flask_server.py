@@ -88,3 +88,11 @@ def set_temperature():
     global TEMPERATURE
     TEMPERATURE = temperature / 100
     return ""
+
+@APP.route('/max_tokens', methods=['POST'])
+def set_max_tokens():
+    max_tokens = _get_json_from_request()["max_tokens"]
+    print(max_tokens)
+    global MAX_TOKENS
+    MAX_TOKENS = max_tokens
+    return ""
