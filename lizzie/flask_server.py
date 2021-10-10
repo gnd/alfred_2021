@@ -84,5 +84,5 @@ def set_temperature():
     temperature = _get_json_from_request()["temperature"]
     print(temperature)
     global TEMPERATURE
-    TEMPERATURE = temperature
+    TEMPERATURE = temperature / 100
     return ""
