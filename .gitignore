@@ -1,1 +1,3 @@
 *.pyc
+lizzie/frontend/node_modules/**
+lizzie/frontend/build/**

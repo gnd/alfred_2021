@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
 
@@ -16,6 +16,14 @@ const App = (): JSX.Element => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [responses, setResponses] = useState<Message[]>([]);
     const [isExpecting, setIsExpecting] = useState(false);
+    const [temperature, setTemperature] = useState(90);
+
+    const setEngine = (engine: string) =>
+        axios.post("/engine", { engine: engine });
+
+    useEffect(() => {
+        axios.post("/temperature", { temperature: temperature });
+    }, [temperature]);
 
     const isInputEmpty = textInput.trim().length === 0;
     const sendMsg = () => {
@@ -42,13 +50,6 @@ const App = (): JSX.Element => {
                 console.error("Failed to fetch response");
                 console.error(error);
             });
-        // Mock response for now
-        // const mockResp = {
-        //     text: textInput,
-        //     sentAt: Date.now(),
-        //     sender: "alzbeta",
-        // };
-        // setResponses([...responses, mockResp]);
     };
 
     const orderedMsgs = messages
@@ -71,18 +72,55 @@ const App = (): JSX.Element => {
             </div>
             <div className="bottom">
                 <div>
-                    <textarea
-                        onChange={(e) => setTextInput(e.target.value)}
-                        value={textInput}
-                    ></textarea>
+                    <div className="slidecontainer">
+                        <label>temperature</label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={temperature}
+                            className="slider"
+                            onChange={(e) =>
+                                setTemperature(Number(e.target.value))
+                            }
+                        />
+                    </div>
+                    <div>
+                        <label>engine</label>
+                        <select
+                            onChange={(e) => setEngine(e.target.value)}
+                            defaultValue="davinci"
+                        >
+                            <option value="ada">Ada</option>
+                            <option value="babbage">Babbage</option>
+                            <option value="curie">Curie</option>
+                            <option value="curie-instruct-beta">
+                                Curie Instruct Beta
+                            </option>
+                            <option value="davinci">Davinci</option>
+                            <option value="davinci-instruct-beta">
+                                Davinci Instruct Beta
+                            </option>
+                        </select>
+                    </div>
                 </div>
                 <div>
-                    <span
-                        onClick={sendMsg}
-                        className={`button${isInputEmpty ? " disabled" : ""}`}
-                    >
-                        <a>🦝</a>
-                    </span>
+                    <div>
+                        <textarea
+                            onChange={(e) => setTextInput(e.target.value)}
+                            value={textInput}
+                        ></textarea>
+                    </div>
+                    <div>
+                        <span
+                            onClick={sendMsg}
+                            className={`button${
+                                isInputEmpty ? " disabled" : ""
+                            }`}
+                        >
+                            <a>🦝</a>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

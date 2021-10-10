@@ -9,8 +9,9 @@ from flask import Flask, render_template, request, send_file
 APP = Flask(__name__, static_folder="frontend/build/", template_folder="frontend/build", static_url_path="")
 
 # Initialize OpenAI
-MAX_TOKENS = 2048
+MAX_TOKENS = 500
 TEMPERATURE = 0.9
+MODEL = "davinci"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def logResponse(response):
@@ -19,9 +20,10 @@ def logResponse(response):
 
 def getLizzieResponse(inputText):
     max_tokens = MAX_TOKENS - len(inputText)
-    resp = openai.Completion.create(engine="davinci", prompt=inputText, max_tokens=max_tokens, temperature=TEMPERATURE)
+    resp = openai.Completion.create(engine=MODEL, prompt=inputText, max_tokens=max_tokens, temperature=TEMPERATURE)
     logResponse(resp)
-    return resp.choices[0]["text"]
+    topResp = resp.choices[0]["text"]
+    return topResp
 
 
 # APP.config['gpt-3'] = STATE
@@ -66,3 +68,19 @@ def answer():
         "sender": "Lizzie",
     }
     return json.dumps(resp)
+
+@APP.route('/engine', methods=['POST'])
+def set_engine():
+    engine = _get_json_from_request()["engine"]
+    print(engine)
+    global MODEL
+    MODEL = engine
+    return ""
+
+@APP.route('/temperature', methods=['POST'])
+def set_temperature():
+    temperature = _get_json_from_request()["temperature"]
+    print(temperature)
+    global TEMPERATURE
+    TEMPERATURE = temperature
+    return ""
