@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, send_file
 APP = Flask(__name__, static_folder="frontend/build/", template_folder="frontend/build", static_url_path="")
 
 # Initialize OpenAI
-MAX_TOKENS = 500
+MAX_TOKENS = 200
 TEMPERATURE = 0.9
 MODEL = "davinci"
 
@@ -25,7 +25,9 @@ def getLizzieResponse(inputText):
     resp = openai.Completion.create(engine=MODEL, prompt=inputText, max_tokens=max_tokens, temperature=TEMPERATURE)
     logResponse(resp)
     topResp = resp.choices[0]["text"]
-    return topResp
+    endIdx = max(topResp.rfind("."), topResp.rfind("?"), topResp.rfind("!"))
+    endIdx = endIdx if endIdx > -1 else 0
+    return topResp[0: endIdx + 1]
 
 
 # APP.config['gpt-3'] = STATE
