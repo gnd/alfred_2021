@@ -12,28 +12,33 @@ APP = Flask(__name__, static_folder="frontend/build/", template_folder="frontend
 MAX_TOKENS = 200
 TEMPERATURE = 0.9
 MODEL = "davinci"
+TOKENS_LIMIT = 2048
 
 # TODO add apikey to config
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def logResponse(response):
-    print(response)
-    print()
-
-def getLizzieResponse(inputText, engine=MODEL, max_tokens=MAX_TOKENS, temperature=TEMPERATURE):
-    max_tokens = max_tokens - len(inputText)
-
-    print()
-    print(inputText)
+def log_request(input_text, engine, max_tokens, temperature):
+    print("###### REQUEST:")
+    print(input_text)
     print(engine)
     print(max_tokens)
     print(temperature)
     print()
 
-    resp = openai.Completion.create(engine=engine, prompt=inputText, max_tokens=max_tokens, temperature=temperature)
+def log_response(response):
+    print("###### RESPONSE:")
+    print(response)
+    print()
+
+def get_lizzie_response(input_text, engine=MODEL, max_tokens=MAX_TOKENS, temperature=TEMPERATURE):
+
+    log_request(input_text, engine, max_tokens, temperature)
+
+    resp = openai.Completion.create(engine=engine, prompt=input_text, max_tokens=max_tokens, temperature=temperature)
     
-    logResponse(resp)
+    log_response(resp)
     
+    # Cut off unfinished sentence
     topResp = resp.choices[0]["text"]
     endIdx = max(topResp.rfind("."), topResp.rfind("?"), topResp.rfind("!"))
     endIdx = endIdx if endIdx > -1 else 0
@@ -82,7 +87,7 @@ def answer():
     # normalize temperature
     temperature = temperature / 100 if temperature > 1 else temperature
 
-    respText = getLizzieResponse(text, engine, max_tokens, temperature)
+    respText = get_lizzie_response(text, engine, max_tokens, temperature)
     resp = {
         "text": respText,
         "sender": "Lizzie",
