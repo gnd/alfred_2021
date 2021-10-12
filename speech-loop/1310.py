@@ -60,7 +60,11 @@ def text_to_speech(text):
     )
 
     # Select the type of audio file you want returned
+    # See: https://googleapis.dev/java/google-cloud-texttospeech/latest/com/google/cloud/texttospeech/v1/AudioConfig.html
+    # For audio profiles see: https://cloud.google.com/text-to-speech/docs/audio-profiles#tts-audio-profile-python
     audio_config = texttospeech.AudioConfig(
+        speaking_rate=0.9, # 0.5 - 4.0
+        effects_profile_id=['medium-bluetooth-speaker-class-device'],
         audio_encoding=texttospeech.AudioEncoding.MP3,
         pitch=0, # 20 for dying patient voice
     )
@@ -104,9 +108,17 @@ def do_with_hypothesis(hypothesis):
     continuation = gpt3_resp["choices"][0]["text"]
     continuation = normalize_text(continuation)
     continuation = cut_to_sentence_end(continuation)
+    
     # Translate generated text back to the language of speech
     out_text = translate_client.translate(continuation, target_language=OUTPUT_LANG)
     out_text = out_text["translatedText"]
+    
+    # Print translated text for debugging
+    print(out_text)
+    
+    # Postprocess translated text
+    out_text.lstrip(". ")               # remove leftover dots and spaces from the beggining
+    out_text.replace("&quot;","")       # remove "&quot;"
 
     # Send hypothesis and translation over network
     # send_text(hypothesis, translation)
