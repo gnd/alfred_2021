@@ -1,3 +1,5 @@
 *.pyc
 lizzie/frontend/node_modules/**
 lizzie/frontend/build/**
+alfred_2021*.json
+*.mp3

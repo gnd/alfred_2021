@@ -82,9 +82,12 @@ def do_with_hypothesis(hypothesis):
     
     print(translation)
 
-    # Send hypothesis and translation over network
-    send_text(hypothesis, translation)
-
+    # Try send hypothesis and translation over network
+    try:
+        send_text(hypothesis, translation)
+    except:
+        print("Can't send text to {}".format(TRANSCRIPTION_HOST))
+    
     # Convert translated hypothesis to speech
     fname = textToSpeech(translation)
 
