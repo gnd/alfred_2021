@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import React, { useEffect } from "react";
+import React from "react";
 import { useState } from "react";
 import axios from "axios";
 
@@ -16,19 +16,9 @@ const App = (): JSX.Element => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [responses, setResponses] = useState<Message[]>([]);
     const [isExpecting, setIsExpecting] = useState(false);
+    const [engine, setEngine] = useState("davinci");
     const [temperature, setTemperature] = useState(90);
     const [respLength, setRespLength] = useState(200);
-
-    const setEngine = (engine: string) =>
-        axios.post("/engine", { engine: engine });
-
-    useEffect(() => {
-        axios.post("/temperature", { temperature: temperature });
-    }, [temperature]);
-
-    useEffect(() => {
-        axios.post("/max_tokens", { max_tokens: respLength });
-    }, [respLength]);
 
     const isInputEmpty = textInput.trim().length === 0;
     const sendMsg = () => {
@@ -41,8 +31,15 @@ const App = (): JSX.Element => {
         setTextInput("");
         setIsExpecting(true);
 
+        const req = {
+            ...msg,
+            engine: engine,
+            max_tokens: respLength,
+            temperature: temperature,
+        };
+
         axios
-            .post("/lizzie", msg)
+            .post("/lizzie", req)
             .then((response) => {
                 setIsExpecting(false);
                 const respMsg: Message = {

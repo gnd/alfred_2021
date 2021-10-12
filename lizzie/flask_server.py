@@ -20,17 +20,26 @@ def logResponse(response):
     print(response)
     print()
 
-def getLizzieResponse(inputText):
-    max_tokens = MAX_TOKENS - len(inputText)
-    resp = openai.Completion.create(engine=MODEL, prompt=inputText, max_tokens=max_tokens, temperature=TEMPERATURE)
+def getLizzieResponse(inputText, engine=MODEL, max_tokens=MAX_TOKENS, temperature=TEMPERATURE):
+    max_tokens = max_tokens - len(inputText)
+
+    print()
+    print(inputText)
+    print(engine)
+    print(max_tokens)
+    print(temperature)
+    print()
+
+    resp = openai.Completion.create(engine=engine, prompt=inputText, max_tokens=max_tokens, temperature=temperature)
+    
     logResponse(resp)
+    
     topResp = resp.choices[0]["text"]
     endIdx = max(topResp.rfind("."), topResp.rfind("?"), topResp.rfind("!"))
     endIdx = endIdx if endIdx > -1 else 0
+    
     return topResp[0: endIdx + 1]
 
-
-# APP.config['gpt-3'] = STATE
 
 def _get_json_from_request():
     return request.get_json(force=True)
@@ -65,34 +74,41 @@ def answer():
     data = _get_json_from_request()
     
     print(data)
+    text = data["text"]
+    engine = data["engine"] if data["engine"] else MODEL
+    max_tokens = data["max_tokens"] if data["max_tokens"] else MAX_TOKENS
+    temperature = data["temperature"] if data["temperature"] else TEMPERATURE
 
-    respText = getLizzieResponse(data["text"])
+    # normalize temperature
+    temperature = temperature / 100 if temperature > 1 else temperature
+
+    respText = getLizzieResponse(text, engine, max_tokens, temperature)
     resp = {
         "text": respText,
         "sender": "Lizzie",
     }
     return json.dumps(resp)
 
-@APP.route('/engine', methods=['POST'])
-def set_engine():
-    engine = _get_json_from_request()["engine"]
-    print(engine)
-    global MODEL
-    MODEL = engine
-    return ""
+# @APP.route('/engine', methods=['POST'])
+# def set_engine():
+#     engine = _get_json_from_request()["engine"]
+#     print(engine)
+#     global MODEL
+#     MODEL = engine
+#     return ""
 
-@APP.route('/temperature', methods=['POST'])
-def set_temperature():
-    temperature = _get_json_from_request()["temperature"]
-    print(temperature)
-    global TEMPERATURE
-    TEMPERATURE = temperature / 100
-    return ""
+# @APP.route('/temperature', methods=['POST'])
+# def set_temperature():
+#     temperature = _get_json_from_request()["temperature"]
+#     print(temperature)
+#     global TEMPERATURE
+#     TEMPERATURE = temperature / 100
+#     return ""
 
-@APP.route('/max_tokens', methods=['POST'])
-def set_max_tokens():
-    max_tokens = _get_json_from_request()["max_tokens"]
-    print(max_tokens)
-    global MAX_TOKENS
-    MAX_TOKENS = max_tokens
-    return ""
+# @APP.route('/max_tokens', methods=['POST'])
+# def set_max_tokens():
+#     max_tokens = _get_json_from_request()["max_tokens"]
+#     print(max_tokens)
+#     global MAX_TOKENS
+#     MAX_TOKENS = max_tokens
+#     return ""
