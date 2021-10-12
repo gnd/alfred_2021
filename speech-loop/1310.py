@@ -183,7 +183,6 @@ def listen_print_loop(responses):
 
 
 def main(speech_lang=SPEECH_LANG):
-    print(speech_lang) # a BCP-47 language tag
     while True:
         processMicrophoneStream(speech_lang, listen_print_loop)
 
