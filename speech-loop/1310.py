@@ -117,8 +117,8 @@ def do_with_hypothesis(hypothesis):
     print(out_text)
     
     # Postprocess translated text
-    out_text.lstrip(". ")               # remove leftover dots and spaces from the beggining
-    out_text.replace("&quot;","")       # remove "&quot;"
+    out_text = out_text.lstrip(". ")               # remove leftover dots and spaces from the beggining
+    out_text = out_text.replace("&quot;","")       # remove "&quot;"
 
     # Send hypothesis and translation over network
     # send_text(hypothesis, translation)
