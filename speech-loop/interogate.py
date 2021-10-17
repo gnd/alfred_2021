@@ -19,19 +19,33 @@ TEMPERATURE = 0.9
 
 PROMPTS = [
     "Create a random question that asks about a really specific and absurd detail of my personal life",
-    "Create a question that asks about my horse's dental hygiene",
-    "Create a question that asks about the secret life of house animals",
+    "Create a question about your own hygiene that is slightly uncomfortable.",
+    # "Create a question that asks about my horse's dental hygiene",
+    # "Create a question that asks about the secret life of house animals",
+    "Imagine you are a police officer interogating a suspect. Ask a question about the suspects intimate life."
 ]
 
 QUESTIONS_PER_PROMPTS = [
-    3, 3, 3
+    1, 1, 1
 ]
 
 SECONDS_TO_ANSWER = [
-    3, 2, 1
+    2, 1.5, 0.75
 ]
 
-SECONDS_AFTER_ROUND = 5
+SPEECH_RATE = [
+    1.1, 1.277, 1.5
+]
+
+SPEECH_PITCH = [
+    -10, -13, -17
+]
+
+SPEECH_VOLUME = [
+    0, 8, 16
+]
+
+SECONDS_AFTER_ROUND = 1
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
@@ -55,7 +69,7 @@ def cut_to_sentence_end(text):
 def pick_voice_randomly():
     return random.choice([texttospeech.SsmlVoiceGender.MALE, texttospeech.SsmlVoiceGender.FEMALE])
 
-def text_to_speech(text):
+def text_to_speech(text, speech_rate, speech_pitch, speech_volume):
     # Set the text input to be synthesized
     synthesis_input = texttospeech.SynthesisInput(text=text)
 
@@ -64,10 +78,11 @@ def text_to_speech(text):
     )
 
     audio_config = texttospeech.AudioConfig(
-        speaking_rate=0.9, # 0.5 - 4.0
+        speaking_rate=speech_rate, # 0.5 - 4.0
         effects_profile_id=['medium-bluetooth-speaker-class-device'],
         audio_encoding=texttospeech.AudioEncoding.MP3,
-        pitch=0, # 20 for dying patient voice
+        pitch=speech_pitch, # 20 for dying patient voice
+        volume_gain_db=speech_volume,
     )
 
     response = client.synthesize_speech(
@@ -115,7 +130,7 @@ def translate_question(question):
     out_text = out_text["translatedText"]
     return out_text
 
-def question_me(prompt, seconds):
+def question_me(prompt, seconds, speech_rate, speech_pitch, speech_volume):
     question_text = generate_question(prompt)
 
     # translate question to CS
@@ -125,11 +140,12 @@ def question_me(prompt, seconds):
     print(question_text)
     print(question_text_cs)
 
-    text_to_speech(question_text_cs)
+    text_to_speech(question_text_cs, speech_rate, speech_pitch, speech_volume)
     
-    for x in range(seconds):
-        print(x)
-        time.sleep(1)
+    time.sleep(seconds)
+    # for x in range(seconds):
+    #     print(x)
+    #     time.sleep(1)
     
 def main():
     while True:
@@ -138,21 +154,15 @@ def main():
             print(x)
             time.sleep(1)
 
-        print()
-
         for i, prompt in enumerate(PROMPTS):
-            print(prompt)
-            print(i)
             seconds_to_answer = SECONDS_TO_ANSWER[i]
             num_questions = QUESTIONS_PER_PROMPTS[i]
-            print(seconds_to_answer)
-            print(num_questions)
+            speech_rate = SPEECH_RATE[i]
+            speech_pitch = SPEECH_PITCH[i]
+            speech_volume = SPEECH_VOLUME[i]
 
             for j in range(num_questions):
-                print("Question number ", j)
-                print(prompt)
-                print(seconds_to_answer)
-                question_me(prompt, seconds_to_answer)
+                question_me(prompt, seconds_to_answer, speech_rate, speech_pitch, speech_volume)
 
 if __name__ == "__main__":
     fire.Fire(main)
