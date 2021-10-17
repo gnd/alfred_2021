@@ -126,7 +126,7 @@ def question_me():
     text_to_speech(question_text_cs)
     
     # Pause for `PAUSE_SECONDS` seconds
-    PAUSE_SECONDS = 3
+    PAUSE_SECONDS = 3 
     for x in range(PAUSE_SECONDS):
         print(x)
         time.sleep(1)

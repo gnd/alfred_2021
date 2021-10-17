@@ -26,10 +26,6 @@ OUTPUT_LANG = "cs"
 TRANSCRIPTION_HOST = "192.168.220.207"
 TRANSCRIPTION_PORT = 5000
 
-ENGINE = "davinci"
-MAX_TOKENS = 150
-TEMPERATURE = 0.9
-
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
 
@@ -37,14 +33,21 @@ def normalize_text(text):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
     return text
-
-def cut_to_sentence_end(text):
-    """Cuts off unfinished sentence."""
-
-    endIdx = max(text.rfind("."), text.rfind("?"), text.rfind("!"))
-    endIdx = endIdx if endIdx > -1 else 0
     
-    return text[0: endIdx + 1]
+#
+# takes a an array of words of the input sentence
+#
+def shuffle_sentence(words):
+    # return an array of all shuffles of a sentence
+    sentence_versions = []
+    
+    # walk over the sentence and shuffle from word[i] to end
+    for i in range(len(words)):
+        shuffled = words[i:]
+        random.shuffle(shuffled)
+        new_sentence = " ".join(words[:i]) + " " + " ".join(shuffled)
+        sentence_versions.append(new_sentence.strip().lower().capitalize())
+    return sentence_versions
 
 def pick_voice_randomly():
     return random.choice([texttospeech.SsmlVoiceGender.MALE, texttospeech.SsmlVoiceGender.FEMALE])
@@ -63,10 +66,10 @@ def text_to_speech(text):
     # See: https://googleapis.dev/java/google-cloud-texttospeech/latest/com/google/cloud/texttospeech/v1/AudioConfig.html
     # For audio profiles see: https://cloud.google.com/text-to-speech/docs/audio-profiles#tts-audio-profile-python
     audio_config = texttospeech.AudioConfig(
-        speaking_rate=0.85, # 0.5 - 4.0
+        speaking_rate=1.4, # 0.5 - 4.0
         effects_profile_id=['medium-bluetooth-speaker-class-device'],
         audio_encoding=texttospeech.AudioEncoding.MP3,
-        pitch=0, # 20 for dying patient voice
+        pitch=3, # 20 for dying patient voice
     )
 
     # Perform the text-to-speech request on the text input with the selected
@@ -95,36 +98,15 @@ def do_with_hypothesis(hypothesis):
     print(hypothesis)
 
     # Translate hypothesis
-    normalized_transcript = normalize_text(hypothesis)
-
-    translation = translate_client.translate(normalized_transcript, target_language=TEXT_TARGET_LANG)
-    translation = translation["translatedText"]    
-    print(translation)
-
-    # Generate continuation
-    gpt3_resp = openai.Completion.create(
-        engine=ENGINE, prompt=translation, max_tokens=MAX_TOKENS, temperature=TEMPERATURE
-    )
-    continuation = gpt3_resp["choices"][0]["text"]
-    continuation = normalize_text(continuation)
-    continuation = cut_to_sentence_end(continuation)
-    
-    # Translate generated text back to the language of speech
-    out_text = translate_client.translate(continuation, target_language=OUTPUT_LANG)
-    out_text = out_text["translatedText"]
+    transcript = normalize_text(hypothesis)
+    transcript_shuffled = shuffle_sentence(transcript.split())
+    versions = ". ".join(transcript_shuffled)
     
     # Print translated text for debugging
-    print(out_text)
+    print(versions)
     
-    # Postprocess translated text
-    out_text = out_text.lstrip(". ")               # remove leftover dots and spaces from the beggining
-    out_text = out_text.replace("&quot;","")       # remove "&quot;"
-
-    # Send hypothesis and translation over network
-    # send_text(hypothesis, translation)
-
     # Convert continuation to speech
-    fname = text_to_speech(out_text)
+    fname = text_to_speech(versions)
 
     # Play utterance
     playsound(fname)
