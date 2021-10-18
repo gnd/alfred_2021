@@ -19,33 +19,37 @@ TEMPERATURE = 0.9
 
 PROMPTS = [
     "Create a random question that asks about a really specific and absurd detail of my personal life",
-    "Create a question about your own hygiene that is slightly uncomfortable.",
+    # "Imagine you are a school principal interogating a student. Ask a question about a student's misbehaviour.",
+    "Create a question about your own hygiene.",
     # "Create a question that asks about my horse's dental hygiene",
     # "Create a question that asks about the secret life of house animals",
-    "Imagine you are a police officer interogating a suspect. Ask a question about the suspects intimate life."
+    "Imagine you are a police officer interogating a suspect. Ask a question about the suspects intimate life.",
 ]
 
 QUESTIONS_PER_PROMPTS = [
-    1, 1, 1
+    1, 5, 8
 ]
 
 SECONDS_TO_ANSWER = [
-    2, 1.5, 0.75
+    5, 3, 1
 ]
 
+# [0.25, 4]
 SPEECH_RATE = [
     1.1, 1.277, 1.5
 ]
 
+# [-20, 20]
 SPEECH_PITCH = [
     -10, -13, -17
 ]
 
+# [-96, 16]
 SPEECH_VOLUME = [
     0, 8, 16
 ]
 
-SECONDS_AFTER_ROUND = 1
+SECONDS_AFTER_ROUND = 3
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
