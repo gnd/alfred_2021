@@ -12,6 +12,7 @@ from google.cloud import speech
 from google.cloud import texttospeech
 from google.cloud import translate_v2 as translate
 
+import utils
 from stt_loop import processMicrophoneStream
 
 SPEECH_LANG = "en-US"
@@ -107,7 +108,8 @@ def do_with_hypothesis(hypothesis):
     # Send hypothesis and translation over network
     # send_text(hypothesis, translation)
 
-    out_text = out_text + "\nI'm out! Mic drop"
+    # out_text = out_text + "\nI'm out! Mic drop"
+    out_text = out_text + utils.text_coda(hypothesis + out_text)
 
     print("Converting text to speech...")
     # Convert continuation to speech

@@ -8,4 +8,4 @@ def text_to_crowns(text):
     return tokens * USD_PER_1000_TOKS / 1000 * CZK_PER_USD
 
 def text_coda(text):
-    return f'{text}\nThis text cost {text_to_crowns(text)} crowns.'
+    return f'\nThis text cost {text_to_crowns(text)} crowns.'
