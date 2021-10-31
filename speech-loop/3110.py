@@ -8,10 +8,12 @@ from __future__ import division
 import os
 import sys
 import fire
+import time
 import openai
 import random
 import socket
 import subprocess
+from termcolor import colored
 from playsound import playsound
 from google.cloud import speech
 from google.cloud import texttospeech
@@ -73,6 +75,7 @@ def do_with_hypothesis(hypothesis):
     num_blanks = 0
     max_blanks = 3
     while len(response.strip()) < 1 and num_blanks < MAX_SUCC_BLANKS:
+        start = time.time()
         gpt3_resp = openai.Completion.create(
             engine=ENGINE,
             prompt=hypothesis,
@@ -80,6 +83,8 @@ def do_with_hypothesis(hypothesis):
             temperature=TEMPERATURE,
             # stop=["\n\n"]
         )
+        end = time.time()
+        print(colored(utils.elapsed_time(start, end), "magenta"), "(GPT-3 response)")
         
         #pcyan(f"GPT-3 response >>> {gpt3_resp}")
         
@@ -105,7 +110,10 @@ def do_with_hypothesis(hypothesis):
 
     print("Converting text to speech...")
     # Convert continuation to speech
+    start = time.time()
     fname = text_to_speech(response)
+    end = time.time()
+    print(colored(utils.elapsed_time(start, end), "magenta"), "(text to speech)")
 
     print("Playing audio...")
     subprocess.run(

@@ -15,6 +15,8 @@ pyellow = lambda text: cprint(text, "yellow")
 pcyan = lambda text: cprint(text, "cyan")
 pmagenta = lambda text: cprint(text, "magenta")
 
+def elapsed_time(start, end):
+    return f'{"{:.3f}".format(end - start)} seconds'
 
 def text_to_crowns(text):
     """Apply GPT-3 pricing on the text and return the approximate price in Czech crowns."""
