@@ -61,7 +61,7 @@ def do_with_hypothesis(hypothesis):
     print("Sending text to GPT-3...")
     # Generate continuation
     response = ""
-    while len(response) < 1:
+    while len(response.strip()) < 1:
         gpt3_resp = openai.Completion.create(
             engine=ENGINE,
             prompt=hypothesis,
@@ -69,6 +69,10 @@ def do_with_hypothesis(hypothesis):
             temperature=TEMPERATURE,
             stop=["\n\n"]
         )
+        print("######################################")
+        print("Complete GPT-3 response:", gpt3_resp)
+        print("##  ##  ##  ##  ##  ##  ##  ##  ##  ##")
+        print("Top text:", gpt3_resp["choices"][0]["text"])
         out_text = gpt3_resp["choices"][0]["text"]
         out_text = utils.normalize_text(out_text)
         out_text = utils.cut_to_sentence_end(out_text)  
