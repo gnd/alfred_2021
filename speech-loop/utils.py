@@ -1,9 +1,20 @@
 import re
 import six
+from termcolor import cprint
 
 CHARS_PER_TOK = 4
 CZK_PER_USD = 21.93
 USD_PER_1000_TOKS = 0.06 # for Davinci
+
+# Logging functions
+
+pblue = lambda text: cprint(text, "blue")
+pred = lambda text: cprint(text, "red")
+pgreen = lambda text: cprint(text, "green")
+pyellow = lambda text: cprint(text, "yellow")
+pcyan = lambda text: cprint(text, "cyan")
+pmagenta = lambda text: cprint(text, "magenta")
+
 
 def text_to_crowns(text):
     """Apply GPT-3 pricing on the text and return the approximate price in Czech crowns."""
@@ -16,6 +27,7 @@ def text_coda(text):
 
 def recognize_stop_word(text):
     if re.search(r"\b(quit|exit)\b", text, re.I):
+        pmagenta(",.-~*´¨¯¨`*·~-.¸-( Stopword Detected )-,.-~*´¨¯¨`*·~-.¸")
         return True
     else:
         return False
