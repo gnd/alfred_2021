@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+
+# Note: Run as `python3 3110.py 2>/dev/null` to redirect stderr
+#       to hide pyaudio warnings from the MicrophoneStream.
+
 from __future__ import division
 
 import os
