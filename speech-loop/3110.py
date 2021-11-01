@@ -70,8 +70,10 @@ def do_with_hypothesis(hypothesis):
 
     print("Sending text to GPT-3...")
     # Generate continuation
+    
+    # hypothesis = hypothesis + ":\n\n"
+    
     response = ""
-
     num_blanks = 0
     max_blanks = 3
     while len(response.strip()) < 1 and num_blanks < MAX_SUCC_BLANKS:
