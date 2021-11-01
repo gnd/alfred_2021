@@ -1,6 +1,6 @@
 import re
 import six
-from termcolor import cprint
+from termcolor import cprint, colored
 
 CHARS_PER_TOK = 4
 CZK_PER_USD = 21.93
@@ -14,6 +14,33 @@ pgreen = lambda text: cprint(text, "green")
 pyellow = lambda text: cprint(text, "yellow")
 pcyan = lambda text: cprint(text, "cyan")
 pmagenta = lambda text: cprint(text, "magenta")
+
+cblue = lambda text: colored(text, "blue")
+cred = lambda text: colored(text, "red")
+cgreen = lambda text: colored(text, "green")
+cyellow = lambda text: colored(text, "yellow")
+ccyan = lambda text: colored(text, "cyan")
+cmagenta = lambda text: colored(text, "magenta")
+
+def prainbow(*args):
+    col_to_func = {
+        "b": cblue,
+        "r": cred,
+        "g": cgreen,
+        "y": cyellow,
+        "c": ccyan,
+        "m": cmagenta,
+        "w": lambda x: x
+    }
+    output = []
+    for x in args:
+        if col_to_func[x[1]]:
+            output.append(col_to_func[x[1]](x[0]))
+        else:
+            print("Unknown color", x[1])
+
+    print(" ".join(output))
+
 
 def elapsed_time(start, end):
     return f'{"{:.3f}".format(end - start)} seconds'

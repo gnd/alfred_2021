@@ -21,7 +21,7 @@ from google.cloud import translate_v2 as translate
 
 import utils
 from stt_loop import processMicrophoneStream
-from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow
+from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow
 
 SPEECH_LANG = "en-US"
 OUTPUT_SPEECH_LANG = "en-US"
@@ -65,12 +65,12 @@ def do_with_hypothesis(hypothesis):
     if utils.recognize_stop_word(hypothesis):
         return
 
-    os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440))
-    pyellow(f"FINAL HYPOTHESIS >>> {hypothesis}")
-
+    os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of recording
+    pyellow(hypothesis + "\n")
     print("Sending text to GPT-3...")
-    # Generate continuation
     
+    # Generate continuation
+
     # hypothesis = hypothesis + ":\n\n"
     
     response = ""
@@ -86,36 +86,45 @@ def do_with_hypothesis(hypothesis):
             # stop=["\n\n"]
         )
         end = time.time()
-        print(colored(utils.elapsed_time(start, end), "magenta"), "(GPT-3 response)")
-        
-        #pcyan(f"GPT-3 response >>> {gpt3_resp}")
         
         out_text = gpt3_resp["choices"][0]["text"]
         out_text = utils.normalize_text(out_text)
-        #out_text = utils.cut_to_sentence_end(out_text)  
     
         # Postprocess translated text
         out_text = out_text.lstrip(". ")               # remove leftover dots and spaces from the beggining
         response = out_text.replace("&quot;","")       # remove "&quot;"
         response = response.strip()
 
-        pred(f'Output transcript >>> {response}')
-        pgreen(f"Output length after trim >>> {len(response)}")
-        
+        # Print response stats
+        prainbow(
+            ["(GPT-3 response)", "w"],
+            ["   " + utils.elapsed_time(start, end), "m"],
+            [f'   {len(gpt3_resp["choices"][0]["text"])} chars', "c"],
+            ["   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4), "y"],
+            [f'   {len(response)} chars clean', "g"],
+            ["   {:.3f} tokens clean".format(len(response) / 4), "r"],
+        )
+
         if len(response) < 1:
+            print("Received blank response :(")
             num_blanks = num_blanks + 1
 
     if num_blanks == MAX_SUCC_BLANKS:
-        response = random.choice(["Try again.", "Sorry, can you please try again.", "I don't understand. Please try again.", "Sorry, what?"])
+        response = random.choice([
+            "Try again.",
+            "Sorry, can you please try again.",
+            "I don't understand. Please try again.",
+            "Sorry, what?"
+        ])
     else:
-        pblue(f"Final output transcript >>> {response}")
+        pblue(response)
 
     print("Converting text to speech...")
     # Convert continuation to speech
     start = time.time()
     fname = text_to_speech(response)
     end = time.time()
-    print(colored(utils.elapsed_time(start, end), "magenta"), "(text to speech)")
+    print("(text to speech)    ", colored(utils.elapsed_time(start, end), "magenta"))
 
     print("Playing audio...")
     subprocess.run(
