@@ -83,7 +83,7 @@ def do_with_hypothesis(hypothesis):
             prompt=hypothesis,
             max_tokens=MAX_TOKENS,
             temperature=TEMPERATURE,
-            # stop=["\n\n"]
+            # stop=["\n\n"] 
         )
         end = time.time()
         
@@ -124,7 +124,7 @@ def do_with_hypothesis(hypothesis):
     start = time.time()
     fname = text_to_speech(response)
     end = time.time()
-    print("(text to speech)    ", colored(utils.elapsed_time(start, end), "magenta"))
+    print("(text to speech)   ", colored(utils.elapsed_time(start, end), "magenta"))
 
     print("Playing audio...")
     subprocess.run(
