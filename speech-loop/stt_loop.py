@@ -47,7 +47,7 @@ def processMicrophoneStream(speech_lang, responses_cb=None):
         if not responses_cb:
             print(responses)
         else:
-            responses_cb(responses)
+            return responses_cb(responses)
 
 
 def main(speech_lang):
