@@ -27,8 +27,10 @@ SPEECH_LANG = "en-US"
 OUTPUT_SPEECH_LANG = "en-US"
 
 ENGINE = "davinci-instruct-beta"
-MAX_TOKENS = 200
-TEMPERATURE = 0.9
+#ENGINE = "davinci"
+MAX_TOKENS = 400
+AVG_TEMPERATURE = 0.7
+TEMPERATURE_SPREAD = 0.2
 
 MAX_SUCC_BLANKS = 3
 
@@ -37,6 +39,10 @@ translate_client = translate.Client()
 
 def pick_voice_randomly():
     return random.choice([texttospeech.SsmlVoiceGender.MALE, texttospeech.SsmlVoiceGender.FEMALE])
+
+def random_temperature():
+    # this makes temperature between 0.7 and 0.9
+    return AVG_TEMPERATURE + (2*TEMPERATURE_SPREAD*random.random()) - TEMPERATURE_SPREAD
 
 def text_to_speech(text):
     synthesis_input = texttospeech.SynthesisInput(text=text)
@@ -78,6 +84,7 @@ def do_with_hypothesis(hypothesis):
     max_blanks = 3
     while len(response.strip()) < 1 and num_blanks < MAX_SUCC_BLANKS:
         start = time.time()
+        TEMPERATURE = random_temperature()
         gpt3_resp = openai.Completion.create(
             engine=ENGINE,
             prompt=hypothesis,
@@ -95,10 +102,10 @@ def do_with_hypothesis(hypothesis):
         response = out_text.replace("&quot;","")       # remove "&quot;"
         response = response.strip()
 
-        # Print response stats
         prainbow(
             ["(GPT-3 response)", "w"],
             ["   " + utils.elapsed_time(start, end), "m"],
+            [f'   Temperature: {TEMPERATURE}', "b"],
             [f'   {len(gpt3_resp["choices"][0]["text"])} chars', "c"],
             ["   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4), "y"],
             [f'   {len(response)} chars clean', "g"],
