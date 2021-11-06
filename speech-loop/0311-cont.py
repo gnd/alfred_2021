@@ -33,18 +33,20 @@ TEMPERATURE = 0.9
 
 MAX_SUCC_BLANKS = 3
 
-TRANSCRIPTION_HOST = "127.0.0.1"
+TEXT_BUFFER = ""
+
+#TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_HOST = "192.168.70.133"
 TRANSCRIPTION_PORT = 5000
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
 
-def send_text(text, translation):
+def send_text(text):
+    global TEXT_BUFFER
     sock = socket.socket()
     sock.connect((TRANSCRIPTION_HOST, TRANSCRIPTION_PORT))
-    sock.send(text.encode())
-    sock.send(("\n").encode())
-    sock.send(translation.encode())
+    sock.send((TEXT_BUFFER + ". " + text).encode())
     sock.close()
 
 def recognize_engine_switch(text):
@@ -188,16 +190,17 @@ def listen_print_loop(responses):
         overwrite_chars = " " * (num_chars_printed - len(transcript))
         if not result.is_final:
             sys.stdout.write(transcript + overwrite_chars + "\r")
-            send_text(transcript, "")
+            send_text(transcript)
             sys.stdout.flush()
             num_chars_printed = len(transcript)
         else:
             return (transcript + overwrite_chars + "\n")
 
 def main(speech_lang=SPEECH_LANG):
-    text_buffer = ""
+    global TEXT_BUFFER
+    TEXT_BUFFER = ""
     while True:
-        if text_buffer == "":
+        if TEXT_BUFFER == "":
             pcyan("Listening :)\n")
         
         text = processMicrophoneStream(speech_lang, listen_print_loop)
@@ -208,22 +211,22 @@ def main(speech_lang=SPEECH_LANG):
         if recognize_temperature(text):
             continue
         if utils.recognize_stop_word(text):
-            text_buffer = ""
+            TEXT_BUFFER = ""
         t = recognize_speech_end(text)
 
         if t == None:
-            text_buffer = text_buffer + " " + text
-            text_buffer = text_buffer.strip()
-            if text_buffer[-1] != "?" and text_buffer[-1] != "!":
-                text_buffer = text_buffer + "."
+            TEXT_BUFFER = TEXT_BUFFER + " " + text
+            TEXT_BUFFER = TEXT_BUFFER.strip()
+            if TEXT_BUFFER[-1] != "?" and TEXT_BUFFER[-1] != "!":
+                TEXT_BUFFER = TEXT_BUFFER + "."
         else:
-            text_buffer = text_buffer + " " + t
-            text_buffer = text_buffer.strip()
-            if text_buffer[-1] != "?" and text_buffer[-1] != "!":
-                text_buffer = text_buffer + "."
-            if len(text_buffer) > 0:
-                do_with_hypothesis(text_buffer)
-            text_buffer = ""
+            TEXT_BUFFER = TEXT_BUFFER + " " + t
+            TEXT_BUFFER = TEXT_BUFFER.strip()
+            if TEXT_BUFFER[-1] != "?" and TEXT_BUFFER[-1] != "!":
+                TEXT_BUFFER = TEXT_BUFFER + "."
+            if len(TEXT_BUFFER) > 0:
+                do_with_hypothesis(TEXT_BUFFER)
+            TEXT_BUFFER = ""
 
 
 if __name__ == "__main__":
