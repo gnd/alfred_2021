@@ -33,8 +33,19 @@ TEMPERATURE = 0.9
 
 MAX_SUCC_BLANKS = 3
 
+TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_PORT = 5000
+
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
+
+def send_text(text, translation):
+    sock = socket.socket()
+    sock.connect((TRANSCRIPTION_HOST, TRANSCRIPTION_PORT))
+    sock.send(text.encode())
+    sock.send(("\n").encode())
+    sock.send(translation.encode())
+    sock.close()
 
 def recognize_engine_switch(text):
     global ENGINE
@@ -99,7 +110,7 @@ def do_with_hypothesis(hypothesis):
     os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of recording
     pyellow(hypothesis + "\n")
     print("Sending text to GPT-3...")
-    
+
     # Generate continuation
 
     # hypothesis = hypothesis + ":\n\n"
@@ -177,6 +188,7 @@ def listen_print_loop(responses):
         overwrite_chars = " " * (num_chars_printed - len(transcript))
         if not result.is_final:
             sys.stdout.write(transcript + overwrite_chars + "\r")
+            send_text(transcript, "")
             sys.stdout.flush()
             num_chars_printed = len(transcript)
         else:

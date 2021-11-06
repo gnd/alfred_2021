@@ -3,10 +3,11 @@ import socket
 import ptext
 
 # set some globals
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
+SCREEN_WIDTH = 1900
+SCREEN_HEIGHT = 1000
 # TODO - automaticaly detect wlan0 ip
-DISPLAY_HOST = "192.168.220.207"
+#DISPLAY_HOST = "192.168.220.207"
+DISPLAY_HOST = "127.0.0.1"
 DISPLAY_PORT = 5000
 PADDING = 50 
 PADDING_TOP = 50 
