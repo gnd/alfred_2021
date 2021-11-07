@@ -455,7 +455,7 @@ def main(speech_lang=SPEECH_LANG):
             send_simple_msg(TEXT_BUFFER)
             do_with_hypothesis(TEXT_BUFFER)
             send_simple_msg("gpt-3 end")
-            time.sleep(0.5)
+            time.sleep(1)
             send_simple_msg("")
             reset_buffer()
         else:
