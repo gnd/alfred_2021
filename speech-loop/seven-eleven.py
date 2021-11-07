@@ -39,15 +39,10 @@ PREV_BUFFER = ""
 TRANSCRIPTION_HOST = "127.0.0.1"
 # TRANSCRIPTION_HOST = "192.168.70.133"
 TRANSCRIPTION_PORT = 5000
-
-INSTRUCT_NICK = "dog"
-NORMAL_NICK = "fish"
+TRANSCRIPTION_PORT_DEBUG = 5050
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
-
-def translate(text, in_lang, out_lang):
-    pass
 
 def send_text(text):
     global TEXT_BUFFER
@@ -72,15 +67,19 @@ def send_simple_msg(msg):
 
 def recognize_engine_switch(text):
     global ENGINE
-    m = re.search(rf"\b(engine ({NORMAL_NICK}|{INSTRUCT_NICK}))\b", text, re.I)
+
+    kw_instruct = "engine instruct" if SPEECH_LANG == "en-US" else "motor instrukce"
+    kw_normal = "engine normal" if SPEECH_LANG == "en-US" else "motor normální"
+
+    m = re.search(rf"\b({kw_normal}|{kw_instruct})\b", text, re.I)
     if m:
-        engine = m.group(2)
-        if engine == NORMAL_NICK:
+        engine = m.group(1)
+        if engine == kw_normal:
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting engine - Davinci )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_engine normal")
             ENGINE = "davinci"
             return True
-        if engine == INSTRUCT_NICK:
+        if engine == kw_instruct:
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting engine - Instruct )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_engine instruct")
             ENGINE = "davinci-instruct-beta"
@@ -89,45 +88,64 @@ def recognize_engine_switch(text):
 
 def recognize_language_switch(text):
     global SPEECH_LANG
-    cz = "Czech"
-    en = "English"
-    m = re.search(rf"\b(({cz}|{en}) language)\b", text, re.I)
-    if m:
-        lang = m.group(2)
-        if lang == cz:
-            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Czech )-,.-~*´¨¯¨`*·~-.¸")
-            send_simple_msg("set_lang czech")
-            SPEECH_LANG = "cs-CZ"
-            return True
-        if lang == en:
+
+    if SPEECH_LANG == "cs-CZ":
+        kw_in = "vstup anglicky"
+        if re.search(rf"\b({kw_in})\b", text, re.I):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - English )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_lang english")
             SPEECH_LANG = "en-US"
+            return True
+        else:
+            return False
+    else: # This is more tricky
+        if re.search(rf"\b(input (Czech|check|chess|chair))\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Czech )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang czech")
+            SPEECH_LANG = "cs-CZ"
             return True
     return False
 
 def recognize_output_switch(text):
     global OUTPUT_SPEECH_LANG
-    cz = "cappuccino"
-    en = "zebra"
-    m = re.search(rf"\b(({cz}|{en}))\b", text, re.I)
-    if m:
-        lang = m.group(2)
-        if lang == cz:
-            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - Czech )-,.-~*´¨¯¨`*·~-.¸")
-            send_simple_msg("set_out_lang czech")
-            OUTPUT_SPEECH_LANG = "cs-CZ"
-            return True
-        if lang == en:
+
+    if SPEECH_LANG == "cs-CZ":
+        kw_cs = "výstup česky"
+        kw_en = "výstup anglicky"
+        m = re.search(rf"\b({kw_cs}|{kw_en})\b", text, re.I)
+        if m:
+            lang = m.group(1)
+            if lang[:-4] == kw_cs[:-4]:
+                pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - Czech )-,.-~*´¨¯¨`*·~-.¸")
+                send_simple_msg("set_out_lang czech")
+                OUTPUT_SPEECH_LANG = "cs-CZ"
+                return True
+            if lang[:-4] == kw_out_en[:-4]:
+                pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - English )-,.-~*´¨¯¨`*·~-.¸")
+                send_simple_msg("set_out_lang english")
+                OUTPUT_SPEECH_LANG = "en-US"
+                return True
+        return False
+    else: 
+        if re.search(rf"\b(output English)\b", text, re.I):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - English )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_out_lang english")
             OUTPUT_SPEECH_LANG = "en-US"
+            return True
+        m = re.search(rf"\b(output (Czech|check|chess|chair))\b", text, re.I)
+        if m:
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - Czech )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_out_lang czech")
+            OUTPUT_SPEECH_LANG = "cs-CZ"
             return True
     return False
 
 def recognize_temperature(text):
     global TEMPERATURE
-    m = re.search(r"\b(temperature ([0-9]+))\b", text, re.I)
+
+    kw_temp = "temperature" if SPEECH_LANG == "en-US" else "teplota"
+
+    m = re.search(rf"\b({kw_temp} ([0-9]+))\b", text, re.I)
     if m:
         temperature = int(m.group(2))
         if temperature >= 0 and temperature <= 100:
@@ -139,23 +157,31 @@ def recognize_temperature(text):
     return False
 
 def chop_endword(text):
-    m = re.search(r"\b(.*)((I'm out)|(peace out))\b", text, re.I)
+    kw_end = ["I'm out", "peace out"] if SPEECH_LANG == "en-US" else ["díky", "jedeš"]
+    
+    m = re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I)
     if m:
         return m.group(1)
     return text
 
 def recognize_speech_end(text):
-    if re.search(r"\b(.*)((I'm out)|(peace out))\b", text, re.I):
+    kw_end = ["I'm out", "peace out"] if SPEECH_LANG == "en-US" else ["díky", "jedeš"]
+    
+    if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
         return True
     return False
 
 def recognize_repeat(text):
-    if re.search(r"\b(.*)(repeat)\b", text, re.I):
+    kw_repeat = "repeat" if SPEECH_LANG == "en-US" else "znovu"
+    
+    if re.search(rf"\b(.*)({kw_repeat})\b", text, re.I):
         return True
     return False
 
 def recognize_delete(text):
-    if re.search(r"\b(delete)\b", text, re.I):
+    kw_del = "delete" if SPEECH_LANG == "en-US" else "smazat"
+    
+    if re.search(rf"\b({kw_del})\b", text, re.I):
         return True
     return False
 
@@ -165,6 +191,7 @@ def recognize_backspace(text):
     return False
 
 def delete_word(text):
+    """Deletes the last word from `text`."""
     text = text.split()
     if len(text) > 0:
         return " ".join(text[:-1])
@@ -172,37 +199,68 @@ def delete_word(text):
         return text
 
 def handle_deletes():
+    """
+    Deletes last words from the text buffer.
+    
+    Deletes one word from the end for each "delete" occurence
+    in the buffer.
+
+    "delete"/"Delete" in English.
+    "smazat"/"Smazat" in Czech.
+    """
     global TEXT_BUFFER
-    num_dels = TEXT_BUFFER.count("delete") + TEXT_BUFFER.count("Delete")
+    
+    kw_del = ["delete", "Delete"] if SPEECH_LANG == "en-US" else ["smazat", "Smazat"]
+    
+    num_dels = TEXT_BUFFER.count(kw_del[0]) + TEXT_BUFFER.count(kw_del[1])
     # Delete `num_dels` words and additionally all "delete"s.
     for x in range(num_dels * 2):
         TEXT_BUFFER = delete_word(TEXT_BUFFER)
 
 def handle_backspaces():
+    """
+    Deletes the last characted of the text buffer for each
+    occurrence of "backspace" or "Backspace".
+    """
     global TEXT_BUFFER
     num_bckspcs = TEXT_BUFFER.count("backspace") + TEXT_BUFFER.count("Backspace")
     TEXT_BUFFER = TEXT_BUFFER.replace("backspace", "").replace("Backspace", "").strip()
     TEXT_BUFFER = TEXT_BUFFER[:-num_bckspcs]
 
 def stopword_cleanup():
+    """Clears the remote screen."""
     send_simple_msg("set_exit")
-    time.sleep(1)
+    time.sleep(0.5)
     send_simple_msg("")
 
 def push_to_buffer(text):
+    """Adds `text` to the nasty global buffer."""
     global TEXT_BUFFER
     TEXT_BUFFER = (TEXT_BUFFER + " " + text).strip()
 
 def reset_buffer():
+    """
+    Resets the global text buffer.
+    
+    Also stores the text buffer for potential later reuse through "repeat".
+    Used after the end-word has been detected and the text has been processed
+    by GPT-3.
+    """
     global TEXT_BUFFER
     global PREV_BUFFER
     PREV_BUFFER = TEXT_BUFFER
     TEXT_BUFFER = ""
 
 def pick_voice_randomly():
+    """Randomly choose between the male and female voice, if available."""
     return random.choice([texttospeech.SsmlVoiceGender.MALE, texttospeech.SsmlVoiceGender.FEMALE])
 
 def text_to_speech(text):
+    """
+    Synthesizes `text` into audio.
+    
+    The audio file is stored on disk as "output.mp3".
+    """
     global OUTPUT_SPEECH_LANG
     synthesis_input = texttospeech.SynthesisInput(text=text)
     voice = texttospeech.VoiceSelectionParams(
@@ -395,12 +453,13 @@ def main(speech_lang=SPEECH_LANG):
             push_to_buffer(text)
             send_simple_msg(TEXT_BUFFER)
             do_with_hypothesis(TEXT_BUFFER)
+            send_simple_msg("gpt-3 end")
+            time.sleep(0.5)
+            send_simple_msg("")
             reset_buffer()
         else:
             push_to_buffer(text)
             send_simple_msg(TEXT_BUFFER)
-
-
 
 if __name__ == "__main__":
     main()
