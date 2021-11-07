@@ -376,6 +376,12 @@ def do_with_hypothesis(hypothesis):
     print()
 
 def listen_print_loop(responses):
+    """
+    Sends intermediate transcriptions to remote display.
+
+    This function is executed for each intermediate response
+    from the Google Clout speech-to-text API.
+    """
     num_chars_printed = 0
     for response in responses:
         if not response.results:
