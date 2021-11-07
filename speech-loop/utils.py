@@ -55,7 +55,7 @@ def text_coda(text):
 
 
 def recognize_stop_word(text):
-    if re.search(r"\b(quit|exit)\b", text, re.I):
+    if re.search(r"\b(quit|exit|sorry)\b", text, re.I):
         pmagenta(",.-~*´¨¯¨`*·~-.¸-( Stopword Detected )-,.-~*´¨¯¨`*·~-.¸")
         return True
     else:
