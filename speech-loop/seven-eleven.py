@@ -28,13 +28,15 @@ SPEECH_LANG = "en-US"
 OUTPUT_SPEECH_LANG = "en-US"
 
 ENGINE = "davinci-instruct-beta"
-MAX_TOKENS = 200
+MAX_TOKENS = 400
 TEMPERATURE = 0.9
 
 MAX_SUCC_BLANKS = 3
 
 TEXT_BUFFER = ""
 PREV_BUFFER = ""
+
+GPT3_RESP = ""
 
 TRANSCRIPTION_HOST = "127.0.0.1"
 # TRANSCRIPTION_HOST = "192.168.70.133"
@@ -201,6 +203,32 @@ def recognize_backspace(text):
         return True
     return False
 
+def recognize_continue(text):
+    kw_cont = "continue" if SPEECH_LANG == "en-US" else "pokračuj"
+
+    if re.search(rf"\b({kw_cont})\b", text, re.I):
+        return True
+    return False
+
+def convert_cs_period(text):
+    if SPEECH_LANG != "cs-CZ":
+        return False
+    
+    return re.sub(rf"\b(tečka)\b", ".", text)
+
+
+def convert_cs_question_mark(text):
+    if SPEECH_LANG != "cs-CZ":
+        return text
+    
+    return re.sub(rf"\b(otazník)\b", "?", text)
+
+def convert_cs_exclamation_mark(text):
+    if SPEECH_LANG != "cs-CZ":
+        return text
+
+    return re.sub(rf"\b(vykřičník)\b", "!", text)
+
 def delete_word(text):
     """Deletes the last word from `text`."""
     text = text.split()
@@ -292,6 +320,8 @@ def text_to_speech(text):
     return fname
 
 def do_with_hypothesis(hypothesis):
+    global GPT3_RESP
+
     if len(hypothesis) == 0:
         pred("\nHypothesis empty\n")
         return
@@ -371,6 +401,8 @@ def do_with_hypothesis(hypothesis):
         end = time.time()
         print("(translation)   ", colored(utils.elapsed_time(start, end), "magenta"))
 
+    GPT3_RESP = response
+
     print("Converting text to speech...")
     # Convert continuation to speech
     start = time.time()
@@ -414,6 +446,7 @@ def listen_print_loop(responses):
 def main(speech_lang=SPEECH_LANG):
     global TEXT_BUFFER
     global SPEECH_LANG
+    global GPT3_RESP
 
     while True:
         if TEXT_BUFFER == "":
@@ -425,6 +458,11 @@ def main(speech_lang=SPEECH_LANG):
         
         # Print "complete utterance" as recognized by the STT service.
         pgreen(text)
+
+        if SPEECH_LANG == "cs-CZ":
+            text = convert_cs_period(text)
+            text = convert_cs_question_mark(text)
+            text = convert_cs_exclamation_mark(text)
 
         # Engine swithing        
         if recognize_engine_switch(text):
@@ -457,6 +495,13 @@ def main(speech_lang=SPEECH_LANG):
             send_simple_msg("")
             reset_buffer()
             continue
+
+        if recognize_continue(text):
+            TEXT_BUFFER = PREV_BUFFER + " " + GPT3_RESP
+            do_with_hypothesis(TEXT_BUFFER)
+            reset_buffer()
+            continue
+
     
         if recognize_delete(text):
             push_to_buffer(text)
