@@ -57,6 +57,7 @@ def normalize_text(text):
         text = text.decode("utf-8")
     
     text = re.sub(r"[0-9]+\. ", "", text)
+    text = re.sub(r"[0-9]+\. ", "", text)
     text = re.sub(r"_+", "", text)
     text = re.sub("&quot;", "", text)
     return text
