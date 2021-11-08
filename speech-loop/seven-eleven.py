@@ -22,7 +22,7 @@ from google.cloud import translate_v2 as translate
 
 import utils
 from stt_loop import processMicrophoneStream
-from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow
+from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
 
 SPEECH_LANG = "en-US"
 OUTPUT_SPEECH_LANG = "en-US"
@@ -78,11 +78,13 @@ def recognize_engine_switch(text):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting engine - Davinci )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_engine normal")
             ENGINE = "davinci"
+            beep(0.3)
             return True
         if engine == kw_instruct:
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting engine - Instruct )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_engine instruct")
             ENGINE = "davinci-instruct-beta"
+            beep(0.3)
             return True
     return False
 
@@ -95,6 +97,7 @@ def recognize_language_switch(text):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - English )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_lang english")
             SPEECH_LANG = "en-US"
+            beep(0.3)
             return True
         else:
             return False
@@ -103,6 +106,7 @@ def recognize_language_switch(text):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Czech )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_lang czech")
             SPEECH_LANG = "cs-CZ"
+            beep(0.3)
             return True
     return False
 
@@ -119,11 +123,13 @@ def recognize_output_switch(text):
                 pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - Czech )-,.-~*´¨¯¨`*·~-.¸")
                 send_simple_msg("set_out_lang czech")
                 OUTPUT_SPEECH_LANG = "cs-CZ"
+                beep(0.3)
                 return True
-            if lang[:-4] == kw_out_en[:-4]:
+            if lang[:-4] == kw_en[:-4]:
                 pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - English )-,.-~*´¨¯¨`*·~-.¸")
                 send_simple_msg("set_out_lang english")
                 OUTPUT_SPEECH_LANG = "en-US"
+                beep(0.3)
                 return True
         return False
     else: 
@@ -131,12 +137,14 @@ def recognize_output_switch(text):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - English )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_out_lang english")
             OUTPUT_SPEECH_LANG = "en-US"
+            beep(0.3)
             return True
         m = re.search(rf"\b(output (Czech|check|chess|chair))\b", text, re.I)
         if m:
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - Czech )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_out_lang czech")
             OUTPUT_SPEECH_LANG = "cs-CZ"
+            beep(0.3)
             return True
     return False
 
@@ -153,6 +161,7 @@ def recognize_temperature(text):
             pmagenta(f",.-~*´¨¯¨`*·~-.¸-( Setting temperature to {temperature} )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg(f"set_temp {temperature}")
             TEMPERATURE = temperature
+            beep(0.3)
             return True
     return False
 
