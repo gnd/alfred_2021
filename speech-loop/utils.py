@@ -1,3 +1,4 @@
+import os
 import re
 import six
 from termcolor import cprint, colored
@@ -41,6 +42,8 @@ def prainbow(*args):
 
     print(" ".join(output))
 
+def beep(seconds=1):
+    os.system('play -nq -t alsa synth {} sine {}'.format(seconds, 440))
 
 def elapsed_time(start, end):
     return f'{"{:.3f}".format(end - start)} seconds'
