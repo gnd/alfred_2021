@@ -110,8 +110,8 @@ def text_to_speech(text):
     return
 
 def generate_question(prompt):
-    question = ""
-    while len(question) < 1:
+    q = ""
+    while len(q) < 1:
         gpt3_resp = openai.Completion.create(
             engine=ENGINE,
             prompt=prompt,
@@ -126,15 +126,15 @@ def generate_question(prompt):
         q = normalize_text(q)
         q = cut_to_sentence_end(q)
         q = q[0:get_question_mark_idx(q) + 1]
-        question = q
+        q = q
 
-    return question
+    return q
 
-def translate_question(question):
+def translate_question(q):
     # Translate generated text back to the language of speech
-    out_text = translate_client.translate(question, target_language=OUTPUT_LANG)
-    out_text = out_text["translatedText"]
-    return out_text
+    out = translate_client.translate(q, target_language=OUTPUT_LANG)
+    out = out["translatedText"]
+    return out
 
 def question_me(prompt):
     q = generate_question(prompt)
