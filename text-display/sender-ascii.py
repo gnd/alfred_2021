@@ -1,3 +1,4 @@
+import fire
 import time
 import socket
 
@@ -110,8 +111,18 @@ def instructions():
     ]
     send_msg("\n".join(instructs))
         
+def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
+    global DISPLAY_HOST
+    global DISPLAY_PORT
+    DISPLAY_HOST = host
+    DISPLAY_PORT = port
 
-while True:
-    # a1()
-    # a3()
-    instructions()
+    while True:
+        # a1()
+        # a3()
+        instructions()
+
+
+
+if __name__ == "__main__":
+    fire.Fire(main)
