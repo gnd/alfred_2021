@@ -29,7 +29,7 @@ ENGINE = "davinci-instruct-beta"
 MAX_TOKENS = 150
 TEMPERATURE = 0.9
 
-SECONDS_FOR_ENTRANCE = 0
+SECONDS_FOR_ENTRANCE = 7
 
 STOCK_RESPONSES = [
     "Zajímavé.", 
