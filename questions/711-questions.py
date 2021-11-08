@@ -1,5 +1,6 @@
 import os
 import six
+import sys
 import fire
 import time
 import openai
@@ -10,14 +11,16 @@ from google.cloud import speech
 from google.cloud import texttospeech
 from google.cloud import translate_v2 as translate
 
-from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow
+from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, cmagenta, ccyan, cyellow
+
+IN_FILE_NAMES = "names.txt"
 
 SPEECH_LANG = "cs-CZ"
 TEXT_TARGET_LANG = "en"
 OUTPUT_SPEECH_LANG = "cs-CZ"
 OUTPUT_LANG = "cs"
 
-ENGINE = "davinci"
+ENGINE = "davinci-instruct-beta"
 MAX_TOKENS = 150
 TEMPERATURE = 0.9
 
@@ -74,17 +77,26 @@ SEEDS = [
     EGO_PROMPT,
     INTELLECT_PROMPT,
     THEATRE_PROMPT,
+    HUMAN_PROMPT,
+    CULTURE_PROPMPT,
 ]
 
-QUESTIONS_PER_SEED = [
-    5, 5, 5, 5, 5
+SECONDS_FOR_ENTRANCE = 0
+
+STOCK_RESPONSES = [
+    "Zajímavé.", 
+    "Ahá", 
+    "Jasně.", 
+    "Ani nepokračuj.", 
+    "Velice zajímavé.", 
+    "Mm, to jsem nečekela.", 
+    "To jsem nečekela.",
+    "Á, to zní moc hezky.",
+    "To jsem ráda.",
+    "To mi stačí. Děkuji.",
 ]
 
-SECONDS_TO_ANSWER = [
-    5, 3, 1
-]
-
-SECONDS_FOR_ENTRANCE = 1
+STOCK_RESP_PROB = 30
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
@@ -110,7 +122,14 @@ def pick_voice_randomly():
 
 def text_to_speech(text):
     # Set the text input to be synthesized
-    synthesis_input = texttospeech.SynthesisInput(text=text)
+
+    # Add emphasis randomly
+    emph = random.choice(["strong", "none", "reduced", "moderate"])
+    text = f"<emphasis level={emph}>" + text + "</emphasis>"
+
+    text = "<speak>" + text + "</speak>"
+
+    synthesis_input = texttospeech.SynthesisInput(ssml=text)
 
     voice = texttospeech.VoiceSelectionParams(
         language_code=OUTPUT_SPEECH_LANG, ssml_gender=pick_voice_randomly()
@@ -130,7 +149,6 @@ def text_to_speech(text):
     with open(fname, "wb") as out:
         # Write the response to the output file.
         out.write(response.audio_content)
-        print('Audio content written to file "output.mp3"')
 
     subprocess.run(
         ["mplayer", "output.mp3"],
@@ -143,14 +161,13 @@ def generate_question(prompt):
     question = ""
     while len(question) < 1:
         gpt3_resp = openai.Completion.create(
-            engine="davinci-instruct-beta",
+            engine=ENGINE,
             prompt=prompt,
             temperature=0.9,
             max_tokens=64,
             top_p=1.0,
             frequency_penalty=0.0,
             presence_penalty=0.0,
-            stop=["\n\n"]
         )
 
         q = gpt3_resp["choices"][0]["text"]
@@ -168,102 +185,101 @@ def translate_question(question):
     return out_text
 
 def question_me(prompt):
-    question_text = generate_question(prompt)
-
-    # translate question to CS
-    question_text_cs = translate_question(question_text)
-
-    text_to_speech(question_text_cs)
+    q = generate_question(prompt)
+    q = translate_question(q)
+    pcyan(q)
+    text_to_speech(q)
     
 def question_person(name, prompt):
-    question_text = generate_question(prompt)
+    q = generate_question(prompt)
+    q = translate_question(q)
+    pcyan(name + ", " + q)
+    q = name + ", <break time=\"500ms\"/>" + q
+    text_to_speech(q)
 
-    question_text = translate_question(question_text)
+def question_specific_person(name, seed):
+    text_to_speech(random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".")
 
-    question_text = name + ", " + question_text
-
-    text_to_speech(question_text)
-
-def question_single_person_loop(name, seed):
-    text_to_speech(random.choice(["Hey,"]) + " " + name + ".")
-
-    pgreen("Asking question in")
     for x in range(SECONDS_FOR_ENTRANCE):
-        pgreen(SECONDS_FOR_ENTRANCE - x)
+        sys.stdout.write(cyellow(f"Asking question in {SECONDS_FOR_ENTRANCE - x}\r"))
+        sys.stdout.flush()
         time.sleep(1)
 
-    input_cmd = ""
-    while input_cmd != "X":
-        if random.randint(0, 10) < 3:
-            text_to_speech(random.choice(["Zajímavé.", "Ahá", "Jasně.", "Ani nepokračuj.", "Velice zajímavé.", "Mm, to jsem nečekela.", "To jsem nečekela."]))
+    # 1. question
+    prompt = get_prompt(seed)
+    pmagenta("Generating question...")
+    question_me(prompt)
+    cmd = input("> ")
+    
+    # next questions
+    while cmd != "n" and cmd != "q":
+        if random.randint(0, 100) < STOCK_RESP_PROB:
+            text_to_speech(random.choice(STOCK_RESPONSES))
         
         prompt = get_prompt(seed)
-        # prompt = "Create a list of questions:\n" + prompt
         pmagenta("Generating question...")
         question_me(prompt)
-        pcyan("Enter \"X\" to end cycle or press enter for another question.")
-        input_cmd = input()
+        cmd = input("> ")
+
+    text_to_speech("<emphasis level=\"moderate\">Ok carbon.</emphasis>")
+    # text_to_speech("Ok, carbon.")
+    return cmd
 
 def question_single_person(name, prompt):
     question_person(name, prompt)
 
-def get_prompt(SEED):
-    idx = random.randint(0, len(SEED) - 1)
-    return SEED[idx]
+def get_prompt(seed):
+    idx = random.randint(0, len(seed) - 1)
+    return seed[idx]
+
+def print_people(people, current_idx):
+    start = people[:current_idx]
+    end = people[current_idx+1:]
+    line = ccyan("[")
+    for x in range(len(people)):
+        if x == current_idx:
+            line = line + cmagenta(people[x])
+        else:
+            line = line + ccyan(people[x])
+        if x < (len(people) - 1):
+            line = line + ccyan(", ")
+    line = line + ccyan("]")
+    print(line)
 
 def main():
-    NAMES = [
-        "Jakub",
-        "Karolína",
-        "Eliška",
-        "Alica",
-        "Jolana",
-        "Anna",
-        "Lenka",
-        "Anastázia",
-        "Hana",
-        "Hanka",
-        "Lucia",
-    ]
-    NAMES_TEMP = [
-        "Jakub",
-        "Karolína",
-        "Eliška",
-        "Alica",
-        "Jolana",
-        "Anna",
-        "Lenka",
-        "Anastázia",
-        "Hana",
-        "Hanka",
-        "Lucia",
-    ]
-    SEED = HUMAN_PROMPT
+    # Load names
+    NAMES = [l.strip() for l in open(IN_FILE_NAMES, "r").readlines()]
+    
+    # Set initial seed
+    SEED = SEEDS[-1]
 
-    input_cmd = ""
-    while input_cmd != "Z":
-        if len(NAMES_TEMP) == 0:
-            pred("All people were asked, moving to second part...")
-            break
-
-        name = random.choice(NAMES_TEMP)
-        NAMES_TEMP.remove(name)
-        pmagenta(f"Proceeding to question {name}")
-        question_single_person_loop(name, SEED)
-        pyellow("Press \"Z\" to proceed to second part or Enter for another person...")
-        input_cmd = input()
+    # First part - series of questions for specific people
+    cmd = ""
+    idx = 0
+    while cmd != "q":
+        if idx % len(NAMES) == 0:
+            idx = 0
+            random.shuffle(NAMES) # Shuffle names randomly
         
+        name = NAMES[idx]
+        
+        print_people(NAMES, idx) # Prints order and currently questioned person.
+        
+        idx = idx + 1
+        
+        cmd = question_specific_person(name, SEED)
 
-    pred("Second part")
+    pred("\n┏(-_-)┛┗(-_-﻿ )┓ OK CARBON ┗(-_-)┛┏(-_-)┓\n")
     os.system('play -nq -t alsa synth {} sine {}'.format(1, 440))
 
-    while True:
-        prompt = get_prompt(SEED)
+    # Second part - question at random for different people
+    cmd = ""
+    while cmd != "q":
+        prompt = get_prompt(random.choice(SEEDS)) # Random seed, random prompt
         name = random.choice(NAMES)
-        pmagenta("Generating question for somebody at random.")
+        pyellow(f"Generating question for {name}.")
         question_single_person(name, prompt)
-        pyellow("Press enter for another question...")
-        input() # don't ask another question until requested
+        cmd = input(">") # Don't ask another question until requested
 
 
 if __name__ == "__main__":
