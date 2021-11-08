@@ -159,9 +159,11 @@ def recognize_temperature(text):
 def chop_endword(text):
     kw_end = ["I'm out", "peace out"] if SPEECH_LANG == "en-US" else ["díky", "jedeš"]
     
-    m = re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I)
-    if m:
-        return m.group(1)
+    if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
+        text = re.sub(rf"\b(({kw_end[0]})|({kw_end[1]}))\b", "", text)
+        text = text.strip()
+        return text
+
     return text
 
 def recognize_speech_end(text):
@@ -296,6 +298,7 @@ def do_with_hypothesis(hypothesis):
         end = time.time()
         print("(translation)   ", colored(utils.elapsed_time(start, end), "magenta"))
 
+    hypothesis = hypothesis.capitalize()
     pyellow(hypothesis + "\n")
     print("Sending text to GPT-3...")
     send_simple_msg(f"set_gpt: {hypothesis}")
@@ -440,6 +443,10 @@ def main(speech_lang=SPEECH_LANG):
         if recognize_repeat(text):
             TEXT_BUFFER = PREV_BUFFER
             do_with_hypothesis(TEXT_BUFFER)
+            send_simple_msg("gpt-3 end")
+            time.sleep(0.5)
+            send_simple_msg("")
+            reset_buffer()
             continue
     
         if recognize_delete(text):
