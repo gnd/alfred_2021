@@ -28,7 +28,7 @@ SPEECH_LANG = "en-US"
 OUTPUT_SPEECH_LANG = "en-US"
 
 ENGINE = "davinci-instruct-beta"
-MAX_TOKENS = 400
+MAX_TOKENS = 200
 TEMPERATURE = 0.9
 
 MAX_SUCC_BLANKS = 3
@@ -376,6 +376,7 @@ def do_with_hypothesis(hypothesis):
             ["   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4), "y"],
             [f'   {len(response)} chars clean', "g"],
             ["   {:.3f} tokens clean".format(len(response) / 4), "r"],
+            ["   {:.3f} tokens total".format((len(response) + len(hypothesis)) / 4), "b"]
         )
 
         if len(response) < 1:
