@@ -41,7 +41,9 @@ GPT3_RESP = ""
 TRANSCRIPTION_HOST = "127.0.0.1"
 # TRANSCRIPTION_HOST = "192.168.70.133"
 TRANSCRIPTION_PORT = 5000
-TRANSCRIPTION_PORT_DEBUG = 5050
+
+DEBUG_HOST = "127.0.0.1"
+DEBUG_PORT = 5432
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
@@ -319,6 +321,24 @@ def text_to_speech(text):
         out.write(response.audio_content)
     return fname
 
+def log_gpt3_response(resp):
+    """ `nc -lkv 5432` to listen. """
+
+    num_chars = len(resp)
+    num_words = len(resp.split())
+    msg = f"Response received | {num_chars} chars | {num_words} words"
+
+    send_simple_msg(msg)
+
+    s = socket.socket()
+    try:
+        s.connect((DEBUG_HOST, DEBUG_PORT))
+        s.send((msg + "\n\n" + resp + "\n\n").encode())
+    except:
+        pass
+    finally:
+        s.close()
+
 def do_with_hypothesis(hypothesis):
     global GPT3_RESP
 
@@ -392,6 +412,7 @@ def do_with_hypothesis(hypothesis):
         ])
     else:
         pblue(response)
+        log_gpt3_response(response)
 
     # Translate GPT-3 output from English to Czech.
     if OUTPUT_SPEECH_LANG == "cs-CZ":
