@@ -515,7 +515,7 @@ def text_to_speech(text):
     send_simple_msg("Converting text to speech...")
     # Convert continuation to speech
     start = time.time()
-    text_to_speech(response)
+    _text_to_speech(text)
     end = time.time()
     print("(text to speech)   ", colored(utils.elapsed_time(start, end), "magenta"))
     send_simple_msg(f"(text to speech)    {utils.elapsed_time(start, end)}")
