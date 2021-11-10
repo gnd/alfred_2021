@@ -374,7 +374,7 @@ def text_to_speech(text):
         language_code=OUTPUT_SPEECH_LANG, ssml_gender=pick_voice_randomly()
     )
     audio_config = texttospeech.AudioConfig(
-        speaking_rate=0.9, # 0.5 - 4.0
+        speaking_rate=0.75, # 0.5 - 4.0
         effects_profile_id=['medium-bluetooth-speaker-class-device'],
         audio_encoding=texttospeech.AudioEncoding.MP3,
         pitch=0, # 20 for dying patient voice
