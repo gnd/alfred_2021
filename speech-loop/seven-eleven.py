@@ -44,6 +44,36 @@ TRANSCRIPTION_PORT = 5000
 DEBUG_HOST = "127.0.0.1"
 DEBUG_PORT = 5432
 
+SPEECH_CODE_TO_LANG_CODE = {
+    "cs-CZ": "cs",
+    "en-US": "en",
+    "fr-FR": "fr",
+    "de-DE": "de",
+    "ru-RU": "ru",
+    "cmn-CN": "zh-CN"
+}
+
+class SpeechCode:
+    def __init__(self):
+        self.CZECH = "cs-CZ"
+        self.ENGLISH = "en-US"
+        self.FRENCH = "fr-FR"
+        self.GERMAN = "de-DE"
+        self.RUSSIAN = "ru-RU"
+        self.CHINESE = "cmn-CN"
+
+class LangCode:
+    def __init__(self):
+        self.CZECH = "cs"
+        self.ENGLISH = "en"
+        self.FRENCH = "fr"
+        self.GERMAN = "de"
+        self.RUSSIAN = "ru"
+        self.CHINESE = "zh-CN"
+
+def getLangCode(speech_code):
+    return SPEECH_CODE_TO_LANG_CODE.get(speech_code)
+
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
 
@@ -65,7 +95,6 @@ class State:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.engine = engine
-
 
 def send_text(text):
     global TEXT_BUFFER
@@ -91,8 +120,8 @@ def send_simple_msg(msg):
 def recognize_engine_switch(text):
     global ENGINE
 
-    kw_instruct = "engine instruct" if SPEECH_LANG == "en-US" else "motor instrukce"
-    kw_normal = "engine normal" if SPEECH_LANG == "en-US" else "motor normální"
+    kw_instruct = "engine instruct" if SPEECH_LANG != "cs-CZ" else "motor instrukce"
+    kw_normal = "engine normal" if SPEECH_LANG != "cs-CZ" else "motor normální"
 
     m = re.search(rf"\b({kw_normal}|{kw_instruct})\b", text, re.I)
     if m:
@@ -122,13 +151,100 @@ def recognize_language_switch(text):
             SPEECH_LANG = "en-US"
             beep(0.3)
             return True
+        if re.search(rf"\b(vstup francouzsky)\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - French )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang french")
+            SPEECH_LANG = "fr-FR"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(vstup rusky)\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Russian )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang russian")
+            SPEECH_LANG = "ru-RU"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(vstup čínsky)\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Chinese )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang chinese")
+            SPEECH_LANG = "cmn-CN"
+            beep(0.3)
+            return True
         else:
             return False
-    else: # This is more tricky
+    elif SPEECH_LANG == "en-US": # This is more tricky
         if re.search(rf"\b(input (Czech|check|chess|chair))\b", text, re.I):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Czech )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_lang czech")
             SPEECH_LANG = "cs-CZ"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(input (french|French))\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - French )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang french")
+            SPEECH_LANG = "fr-FR"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(input (russian|Russian))\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Russian )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang russian")
+            SPEECH_LANG = "ru-RU"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(input (chinese|Chinese))\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Chinese )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang chinese")
+            SPEECH_LANG = "cmn-Cn"
+            beep(0.3)
+            return True
+        else:
+            return False
+    elif SPEECH_LANG == "fr-FR":
+        if re.search(rf"\b(saisir (anglais|Anglais))\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - English )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang english")
+            SPEECH_LANG = "en-US"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(saisir (tchèque|Tchèque))\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Czech )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang cs-CZ")
+            SPEECH_LANG = "cs-CZ"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(saisir (russe|Russe))\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Russian )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang ru-RU")
+            SPEECH_LANG = "ru-RU"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(saisir (chinoise|Chinoise))\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - Chinese )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("set_lang cmn-CN")
+            SPEECH_LANG = "cmn-CN"
+            beep(0.3)
+            return True
+        if re.search(rf"\b(Michael Jackson)\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - English )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("recognized Michael Jackson")
+            send_simple_msg("set_lang english")
+            SPEECH_LANG = "en-US"
+            beep(0.3)
+            return True
+        return False    
+    elif SPEECH_LANG == "ru-RU":
+        if re.search(rf"\b(Michael Jackson)\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - English )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("recognized Michael Jackson")
+            send_simple_msg("set_lang english")
+            SPEECH_LANG = "en-US"
+            beep(0.3)
+            return True
+    elif SPEECH_LANG == "cmn-CN":
+        if re.search(rf"\b(Michael Jackson)\b", text, re.I):
+            pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - English )-,.-~*´¨¯¨`*·~-.¸")
+            send_simple_msg("recognized Michael Jackson")
+            send_simple_msg("set_lang english")
+            SPEECH_LANG = "en-US"
             beep(0.3)
             return True
     return False
@@ -155,7 +271,7 @@ def recognize_output_switch(text):
                 beep(0.3)
                 return True
         return False
-    else: 
+    elif SPEECH_LANG == "en-US": 
         if re.search(rf"\b(output English)\b", text, re.I):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting output language - English )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_out_lang english")
@@ -174,7 +290,7 @@ def recognize_output_switch(text):
 def recognize_temperature(text):
     global TEMPERATURE
 
-    kw_temp = "temperature" if SPEECH_LANG == "en-US" else "teplota"
+    kw_temp = "temperature" if SPEECH_LANG != "cs-CZ" else "teplota"
 
     m = re.search(rf"\b({kw_temp} ([0-9]+))\b", text, re.I)
     if m:
@@ -189,7 +305,7 @@ def recognize_temperature(text):
     return False
 
 def chop_endword(text):
-    kw_end = ["I'm out", "peace out"] if SPEECH_LANG == "en-US" else ["díky", "jedeš"]
+    kw_end = ["I'm out", "peace out"] if SPEECH_LANG != "cs-CZ" else ["díky", "jedeš"]
     
     if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
         text = re.sub(rf"\b(({kw_end[0]})|({kw_end[1]}))\b", "", text)
@@ -199,47 +315,54 @@ def chop_endword(text):
     return text
 
 def recognize_speech_end(text):
-    kw_end = ["I'm out", "peace out"] if SPEECH_LANG == "en-US" else ["díky", "jedeš"]
+    kw_end = ["I'm out", "peace out"] if SPEECH_LANG != "cs-CZ" else ["díky", "jedeš"]
     
     if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
+        pyellow("> speech end")
         return True
     return False
 
 def recognize_repeat(text):
-    kw_repeat = "repeat" if SPEECH_LANG == "en-US" else "znovu"
+    kw_repeat = "repeat" if SPEECH_LANG != "cs-CZ" else "znovu"
     
     if re.search(rf"\b(.*)({kw_repeat})\b", text, re.I):
+        pyellow("> repeat")
         return True
     return False
 
 def recognize_delete(text):
-    kw_del = "delete" if SPEECH_LANG == "en-US" else "smazat"
+    kw_del = "delete" if SPEECH_LANG != "cs-CZ" else "smazat"
     
     if re.search(rf"\b({kw_del})\b", text, re.I):
+        pyellow("> delete")
         return True
     return False
 
 def recognize_backspace(text):
     if re.search(r"\b(backspace)\b", text, re.I):
+        pyellow("> backspace")
         return True
     return False
 
 def recognize_continue(text):
-    kw_cont = "continue" if SPEECH_LANG == "en-US" else "pokračuj"
+    kw_cont = "continue" if SPEECH_LANG != "cs-CZ" else "pokračuj"
 
     if re.search(rf"\b({kw_cont})\b", text, re.I):
+        pyellow("> cont")
         return True
     return False
 
 def recognize_info(text):
     kw_info = "info"
     if re.search(rf"\b({kw_info})\b", text, re.I):
+        pyellow("> info")
         return True
     return False
 
 def recognize_help(text):
-    kw_help = "help" if SPEECH_LANG == "en-US" else "pomoc|nápověda"
+    kw_help = "help" if SPEECH_LANG != "cs-CZ" else "pomoc|nápověda"
     if re.search(rf"\b({kw_help})\b", text, re.I):
+        pyellow("> help")
         return True
     return False
 
@@ -362,7 +485,7 @@ def pick_voice_randomly():
     """Randomly choose between the male and female voice, if available."""
     return random.choice([texttospeech.SsmlVoiceGender.MALE, texttospeech.SsmlVoiceGender.FEMALE])
 
-def text_to_speech(text):
+def _text_to_speech(text):
     """
     Synthesizes `text` into audio.
     
@@ -387,12 +510,37 @@ def text_to_speech(text):
         out.write(response.audio_content)
     return fname
 
-def log_gpt3_response(resp):
-    """ `nc -lkv 5432` to listen. """
+def text_to_speech(text):
+    print("Converting text to speech...")
+    send_simple_msg("Converting text to speech...")
+    # Convert continuation to speech
+    start = time.time()
+    text_to_speech(response)
+    end = time.time()
+    print("(text to speech)   ", colored(utils.elapsed_time(start, end), "magenta"))
+    send_simple_msg(f"(text to speech)    {utils.elapsed_time(start, end)}")
 
-    num_chars = len(resp)
-    num_words = len(resp.split())
-    msg = f"Response received | {num_chars} chars | {num_words} words"
+def play_audio():
+    print("Playing audio...")
+    subprocess.run(
+        ["mplayer", "output.mp3"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+def translate_response(response):
+    print("Translating response...")
+    send_simple_msg("Translating GPT-3 response...")
+    start = time.time()
+    res = translate_client.translate(response, target_language=getLangCode(OUTPUT_SPEECH_LANG))
+    res = res["translatedText"]
+    end = time.time()
+    print("(translation)   ", colored(utils.elapsed_time(start, end), "magenta"))
+    send_simple_msg(f"(translation)    {utils.elapsed_time(start, end)}")
+    return res
+
+def log_gpt3_response(msg):
+    """ `nc -lkv 5432` to listen. """
 
     send_simple_msg(msg)
 
@@ -406,22 +554,26 @@ def log_gpt3_response(resp):
         s.close()
 
 def do_with_hypothesis(hypothesis):
+    pred(">>>>>>>>> DO WITH HYPOTHESIS")
     global GPT3_RESP
 
     if len(hypothesis) == 0:
+        send_simple_msg("Hypothesis empty")
         pred("\nHypothesis empty\n")
         return
 
     os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of recording
 
     # Translate hypothesis from Czech to English.
-    if SPEECH_LANG == "cs-CZ":
+    if SPEECH_LANG != "en-US":
         start = time.time()
+        send_simple_msg("Translating hypothesis...")
         print("Translating hypothesis...")
         hypothesis = translate_client.translate(hypothesis, target_language="en")
         hypothesis = hypothesis["translatedText"] 
         end = time.time()
         print("(translation)   ", colored(utils.elapsed_time(start, end), "magenta"))
+        send_simple_msg(f"(translation)    {utils.elapsed_time(start, end)}")
 
     hypothesis = hypothesis.capitalize()
     pyellow(hypothesis + "\n")
@@ -478,32 +630,27 @@ def do_with_hypothesis(hypothesis):
         ])
     else:
         pblue(response)
-        log_gpt3_response(response)
 
-    # Translate GPT-3 output from English to Czech.
-    if OUTPUT_SPEECH_LANG == "cs-CZ":
-        print("Translating response...")
-        start = time.time()
-        response = translate_client.translate(response, target_language="cs")
-        response = response["translatedText"]
-        end = time.time()
-        print("(translation)   ", colored(utils.elapsed_time(start, end), "magenta"))
+    if OUTPUT_SPEECH_LANG != "en-US":
+        response = translate_response(response)
 
     GPT3_RESP = response
 
-    print("Converting text to speech...")
-    # Convert continuation to speech
-    start = time.time()
-    fname = text_to_speech(response)
-    end = time.time()
-    print("(text to speech)   ", colored(utils.elapsed_time(start, end), "magenta"))
+    text_to_speech(response)
 
-    print("Playing audio...")
-    subprocess.run(
-        ["mplayer", "output.mp3"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+    log_gpt3_response("".join([
+            f"(GPT-3 response)",
+            "   " + utils.elapsed_time(start, end),
+            f'   {len(gpt3_resp["choices"][0]["text"])} chars',
+            "   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4),
+            f'   {len(response)} chars clean',
+            "   {:.3f} tokens clean".format(len(response) / 4),
+            "   {:.3f} tokens total".format((len(response) + len(hypothesis)) / 4),
+            f"   {len(response.split())} words"
+        ]))
+
+    play_audio()
+
     os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of response
     print()
 
