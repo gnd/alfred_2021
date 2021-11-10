@@ -232,7 +232,7 @@ def recognize_language_switch(text):
             return True
         return False    
     elif SPEECH_LANG == "ru-RU":
-        if re.search(rf"\b(Michael Jackson)\b", text, re.I):
+        if re.search(rf"\b(Майкл Джексон)\b", text, re.I):
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting language - English )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("recognized Michael Jackson")
             send_simple_msg("set_lang english")
