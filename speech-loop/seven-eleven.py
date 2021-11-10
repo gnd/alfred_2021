@@ -39,7 +39,6 @@ PREV_BUFFER = ""
 GPT3_RESP = ""
 
 TRANSCRIPTION_HOST = "127.0.0.1"
-# TRANSCRIPTION_HOST = "192.168.70.133"
 TRANSCRIPTION_PORT = 5000
 
 DEBUG_HOST = "127.0.0.1"
@@ -47,6 +46,26 @@ DEBUG_PORT = 5432
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
+
+class State:
+    def __init__(
+        self,
+        speech_lang=SPEECH_LANG,
+        output_speech_lang=OUTPUT_SPEECH_LANG,
+        temperature=TEMPERATURE,
+        max_tokens=MAX_TOKENS,
+        engine=ENGINE,
+    ):
+        self.speech_lang = speech_lang
+        self.output_speech_lang = output_speech_lang
+        
+        self.buffer = ""
+        self.prev_buffer = ""
+        
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.engine = engine
+
 
 def send_text(text):
     global TEXT_BUFFER
@@ -212,12 +231,59 @@ def recognize_continue(text):
         return True
     return False
 
+def recognize_info(text):
+    kw_info = "info"
+    if re.search(rf"\b({kw_info})\b", text, re.I):
+        return True
+    return False
+
+def recognize_help(text):
+    kw_help = "help" if SPEECH_LANG == "en-US" else "pomoc|nápověda"
+    if re.search(rf"\b({kw_help})\b", text, re.I):
+        return True
+    return False
+
+def recognize_word(word, text):
+    if re.search(rf"\b({word})\b", text, re.I):
+        return True
+    return False
+
+def recognize_words(words, text):
+    ws = "|".join(words)
+    if re.search(rf"\b({ws})\b", text, re.I):
+        return True
+    return False
+
+def send_info():
+    info = f"Engine: {ENGINE}\nTemperature: {TEMPERATURE}\nInput lang: {SPEECH_LANG}\nOutput lang: {OUTPUT_SPEECH_LANG}"
+    send_simple_msg(info)
+
+def send_help():
+    help_msg = [
+        "     ,.-~*´¨¯¨`*·~-.¸-_   repeat carbon   _-,.-~*´¨¯¨`*·~-.¸",
+        "",
+        "Anglicky                           Cesky",
+        "",
+        "engine normal/instruct   motor normální/instrukce",
+        "temperature 0-100           teplota 0-100",
+        "input Czech                      vstup anglicky",
+        "output Czech/English     výstup česky/anglicky",
+        "I'm out/peace out              díky/jedeš",
+        "exit/quit/sorry                   exit/quit/sorry",
+        "repeat                                 znovu",
+        "delete                                 smazat",
+        "backspace                          backspace",
+        "continue                             pokračuj",
+        "info                                      info/nápověda"
+    ]
+    help_msg = "\n".join(help_msg)
+    send_simple_msg(help_msg)
+
 def convert_cs_period(text):
     if SPEECH_LANG != "cs-CZ":
         return False
     
     return re.sub(rf"\b(tečka)\b", ".", text)
-
 
 def convert_cs_question_mark(text):
     if SPEECH_LANG != "cs-CZ":
@@ -524,7 +590,6 @@ def main(speech_lang=SPEECH_LANG):
             reset_buffer()
             continue
 
-    
         if recognize_delete(text):
             push_to_buffer(text)
             handle_deletes()
@@ -535,6 +600,14 @@ def main(speech_lang=SPEECH_LANG):
             push_to_buffer(text)
             handle_backspaces()
             send_simple_msg(TEXT_BUFFER)
+            continue
+
+        if recognize_info(text):
+            send_info()
+            continue
+
+        if recognize_help(text):
+            send_help()
             continue
 
         # Once speech end is recognized, text is sent to GPT-3
