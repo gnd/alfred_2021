@@ -5,6 +5,7 @@ import sys
 import fire
 import time
 import openai
+import socket
 import random
 import subprocess
 from playsound import playsound
@@ -29,7 +30,7 @@ ENGINE = "davinci-instruct-beta"
 MAX_TOKENS = 150
 TEMPERATURE = 0.9
 
-SECONDS_FOR_ENTRANCE = 7
+SECONDS_FOR_ENTRANCE = 2
 
 STOCK_RESPONSES = [
     "Zajímavé.", 
@@ -46,6 +47,19 @@ STOCK_RESPONSES = [
 
 STOCK_RESP_PROB = 30
 
+TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_PORT = 5000
+
+def send_simple_msg(msg):
+    sock = socket.socket()
+    try:
+        sock.connect((TRANSCRIPTION_HOST, TRANSCRIPTION_PORT))
+        sock.send(msg.encode())
+    except:
+        pred(f"Cannot connect to {TRANSCRIPTION_HOST}:{TRANSCRIPTION_PORT}")
+    finally:
+        sock.close()
+
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
 
@@ -55,8 +69,7 @@ def get_question_mark_idx(text):
 def normalize_text(text):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
-    
-    text = re.sub(r"[0-9]+\. ", "", text)
+
     text = re.sub(r"[0-9]+\. ", "", text)
     text = re.sub(r"_+", "", text)
     text = re.sub("&quot;", "", text)
@@ -135,6 +148,7 @@ def translate_question(q):
     # Translate generated text back to the language of speech
     out = translate_client.translate(q, target_language=OUTPUT_LANG)
     out = out["translatedText"]
+    out = re.sub(r"[0-9]+\. ", "", out)
     return out
 
 def question_me(prompt):
@@ -147,10 +161,12 @@ def question_person(name, prompt):
     q = generate_question(prompt)
     q = translate_question(q)
     pcyan(name + ", " + q)
+    send_simple_msg(name.upper())
     q = name + ", <break time=\"500ms\"/>" + q
     text_to_speech(q)
 
 def question_specific_person(name, seed):
+    send_simple_msg(name.upper())
     text_to_speech(random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".")
 
     for x in range(SECONDS_FOR_ENTRANCE):
