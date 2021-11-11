@@ -44,10 +44,6 @@ def cycle_pin(pin, high_time):
     sleep(high_time)
     GPIO.output(pin, GPIO.LOW)
 
-
-def pin_on(unused_addr, pin):
-
-
 def noteon(s, x, y):
     print("ON s: {} x: {} y: {}")
     #GPIO.output(pin, GPIO.HIGH)
