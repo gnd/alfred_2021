@@ -286,7 +286,7 @@ class App:
             TRANSCRIPTION_PORT,
             FONT_FILE
         )
-        self.dm = DisplayManager(self, self.display, padding=(150, 200))
+        self.dm = DisplayManager(self, self.display, padding=(150, 200), max_words=24)
         
     def run(self):
         while True:
@@ -369,6 +369,7 @@ class App:
         # )["translatedText"]
         # self.push_to_trans_buffer(t)
 
+        # Translates entire buffer each time.
         self.trans_buffer = translate_client.translate(
             self.text_buffer,
             target_language="en"
