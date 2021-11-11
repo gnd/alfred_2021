@@ -47,7 +47,7 @@ def chop_endword(text):
     kw_end = ["I'm out", "peace out"] if SPEECH_LANG != "cs-CZ" else ["díky", "jedeš"]
     
     if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
-        text = re.sub(rf"\b(({kw_end[0]})|({kw_end[1]}))\b", "", text)
+        text = re.sub(rf"\b(díky|Díky|jedeš|Jedeš|I'm out|peace out|Peace out)\b", "", text)
         text = text.strip()
         print("Matched, returning:", text)
         return text
