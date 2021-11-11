@@ -16,12 +16,16 @@ TEMPERATURE = 0.9
 MAX_SUCC_BLANKS = 3
 
 class GPT3Client:
-    def __init__(self, app, translate_client, input_lang="cs", output_speech_lang="cs-CZ"):
+    def __init__(self, app, translate_client, engine=ENGINE, input_lang="cs", output_speech_lang="cs-CZ"):
         self.app = app
+        self.engine = engine
         self.input_lang = input_lang
         self.output_speech_lang = output_speech_lang
         self.translate_client = translate_client
         self.tts_client = texttospeech.TextToSpeechClient()
+
+    def set_engine(self, engine):
+        self.engine = engine
 
     def translate(self, x, target_lang):
         start = time.time()
@@ -46,6 +50,8 @@ class GPT3Client:
         os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of recording
         pred(f"GPT-3 input: {x}")
 
+        self.log(x)
+
         # Translate hypothesis from Czech to English.
         if self.input_lang != "en-US":
             x = self.translate(x, "en")
@@ -61,7 +67,7 @@ class GPT3Client:
         while len(y.strip()) < 1 and num_blanks < MAX_SUCC_BLANKS:
             start = time.time()
             resp = openai.Completion.create(
-                engine=ENGINE,
+                engine=self.engine,
                 prompt=x,
                 max_tokens=MAX_TOKENS,
                 temperature=TEMPERATURE,
@@ -103,16 +109,16 @@ class GPT3Client:
 
         self.text_to_speech(y)
 
-        # log_gpt3_response("".join([
-        #         f"(GPT-3 response)",
-        #         "   " + elapsed_time(start, end),
-        #         f'   {len(gpt3_resp["choices"][0]["text"])} chars',
-        #         "   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4),
-        #         f'   {len(response)} chars clean',
-        #         "   {:.3f} tokens clean".format(len(response) / 4),
-        #         "   {:.3f} tokens total".format((len(response) + len(hypothesis)) / 4),
-        #         f"   {len(response.split())} words"
-        #     ]))
+        self.log("".join([
+                f"(GPT-3 response)",
+                "   " + elapsed_time(start, end),
+                f'   {len(resp["choices"][0]["text"])} chars',
+                "   {:.3f} tokens".format(len(resp["choices"][0]["text"]) / 4),
+                f'   {len(y)} chars clean',
+                "   {:.3f} tokens clean".format(len(y) / 4),
+                "   {:.3f} tokens total".format((len(y) + len(x)) / 4),
+                f"   {len(y.split())} words"
+            ]))
 
         self.play_audio()
 
@@ -170,16 +176,6 @@ class GPT3Client:
         # send_simple_msg(f"(translation)    {elapsed_time(start, end)}")
         return res
 
-def log_gpt3_response(msg):
-    """ `nc -lkv 5432` to listen. """
+    def log(self, msg):
+        self.app.dm.display_action(msg)
 
-    # send_simple_msg(msg)
-
-    s = socket.socket()
-    try:
-        s.connect((DEBUG_HOST, DEBUG_PORT))
-        s.send((msg + "\n\n" + resp + "\n\n").encode())
-    except:
-        pass
-    finally:
-        s.close()

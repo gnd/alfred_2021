@@ -85,7 +85,10 @@ def normalize_text(text):
 def sanitize_translation(text):
     t = text.replace("&#39;", "'")
     t = text.replace("\"", "")
-    t = t[0].upper() + t[1:] # Capitalize; `capitalize` sucks
+    if len(t) > 2:
+        t = t[0].upper() + t[1:] # Capitalize; `capitalize` sucks
+    elif len(t) == 1:
+        t = t.upper()
     return t
 
 def concat(a, b):

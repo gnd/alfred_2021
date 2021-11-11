@@ -10,7 +10,6 @@ class DisplayManager:
         self.padding_top = padding[0]
         self.padding_left = padding[1]
 
-    
     def display(self):
         msg = self.app.text_buffer_window if self.app.text_buffer_window is not None else self.app.text_buffer
         fill = True if not self.top_bottom_split else False
@@ -47,6 +46,12 @@ class DisplayManager:
             align=self.align,
             padding_top=self.padding_top,
             padding_left=self.padding_left,
+        )
+
+    def display_action(self, msg):
+        self.d.send(
+            text=msg,
+            fill=True
         )
 
     def clear_top(self):

@@ -23,12 +23,17 @@ from display_manager import DisplayManager
 
 from tongue_twister import TongueTwister
 
-from kw_parser import replace_punct, recognize_kws
+from kw_parser import replace_punct, recognize_kws, INSTRUCT_RE, NORMAL_RE
 
 from gpt3 import GPT3Client
 
-SPEECH_LANG = "cs-CZ"
-OUTPUT_SPEECH_LANG = "cs-CZ"
+DAVINCI = "davinci"
+DAVINCI_BETA_INSTRUCT = "davinci-instruct-beta"
+
+SPEECH_EN = "en-US"
+SPEECH_CS = "cs-CZ"
+TEXT_EN = "en"
+TEXT_CS = "cs"
 
 TRANSCRIPTION_HOST = "127.0.0.1"
 TRANSCRIPTION_PORT = 5000
@@ -42,21 +47,8 @@ MAX_WORDS = 24
 
 PAUSE_LENGTH = 2 # If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
 
-def chop_endword(text):
-    print("CHop endword text:", text)
-    kw_end = ["I'm out", "peace out"] if SPEECH_LANG != "cs-CZ" else ["díky", "jedeš"]
-    
-    if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
-        text = re.sub(rf"\b(díky|Díky|jedeš|Jedeš|I'm out|peace out|Peace out)\b", "", text)
-        text = text.strip()
-        print("Matched, returning:", text)
-        return text
-
-    print("Didn't match, returning:", text)
-    return text
-
 class App:
-    def __init__(self, speech_lang=SPEECH_LANG, reset_pause=PAUSE_LENGTH):
+    def __init__(self, speech_lang=SPEECH_CS, reset_pause=PAUSE_LENGTH):
         self.text_buffer = ""
         self.prev_text_buffer = ""
         self.text_buffer_window = ""
@@ -83,7 +75,7 @@ class App:
         self.translate_client = translate.Client()
 
         # GPT3 client
-        self.gpt3 = GPT3Client(self, self.translate_client)
+        self.gpt3 = GPT3Client(self, self.translate_client, engine=DAVINCI_BETA_INSTRUCT)
         self.gpt3_resp = ""
         
     def run(self):
@@ -101,6 +93,62 @@ class App:
             # Print "complete utterance" as recognized by the STT service.
             pgreen(text)
 
+            # Set Instruct
+            if kw_dict.get("instruct"):
+                self.gpt3.set_engine(DAVINCI_BETA_INSTRUCT)
+                pred("Setting instruct")
+                self.dm.display_action("engine: Instruct")
+                time.sleep(1)
+                text = re.sub(INSTRUCT_RE, "", text).strip()
+
+            # Set Normal
+            if kw_dict.get("normal"):
+                self.gpt3.set_engine(DAVINCI)
+                pred("Setting normal")
+                self.dm.display_action("engine: Normal")
+                time.sleep(1)
+                text = re.sub(NORMAL_RE, "", text).strip()
+
+            if kw_dict.get("in_english"):
+                self.speech_lang = SPEECH_EN
+                pred("Setting input English")
+                self.dm.display_action("input: English")
+                time.sleep(1)
+                self.dm.clear()
+                self.reset_buffer()
+                self.reset_trans_buffer()
+                continue
+
+            if kw_dict.get("in_czech"):
+                self.speech_lang = SPEECH_CS
+                pred("Setting input Czech")
+                self.dm.display_action("input: Czech")
+                time.sleep(1)
+                self.dm.clear()
+                self.reset_buffer()
+                self.reset_trans_buffer()
+                continue
+
+            if kw_dict.get("out_english"):
+                self.gpt3.output_speech_lang = SPEECH_EN
+                pred("Setting output English")
+                self.dm.display_action("output: English")
+                time.sleep(1)
+                continue
+
+            if kw_dict.get("out_czech"):
+                self.gpt3.output_speech_lang = SPEECH_CS
+                pred("Setting output Czech")
+                self.dm.display_action("output: Czech")
+                time.sleep(1)
+                continue
+
+            if kw_dict.get("show"):
+                self.dm.display_action(self.text_buffer)
+                time.sleep(3)
+                self.dm.clear()
+                continue
+            
             # Stop word clears the text
             if kw_dict.get("clear"):
                 self.dm.clear()
@@ -144,7 +192,7 @@ class App:
                 self.reset_trans_buffer()
                 continue
             if kw_dict.get("submit"):
-                text = chop_endword(text)
+                text = self.chop_endword(text)
 
                 self.push_to_buffer(text)
                 self.dm.display()
@@ -220,11 +268,11 @@ class App:
         self.trans_buffer = ""
         self.trans_buffer_window = ""
 
-    def translate_cs(self):
+    def translate(self):
         pyellow(f"Translating text: {self.text_buffer_window}")
         translation = self.translate_client.translate(
             self.text_buffer_window,
-            target_language="en"
+            target_language=TEXT_EN if self.speech_lang == SPEECH_CS else TEXT_CS
         )["translatedText"]
         pyellow(f"Received: {translation}")
         translation = sanitize_translation(translation)
@@ -236,9 +284,23 @@ class App:
         self.dm.display_translation()
 
     def display_translation_async(self):
-        t = threading.Thread(target=self.translate_cs)
+        t = threading.Thread(target=self.translate)
         t.start()
+
+    def chop_endword(self, text):
+        print("CHop endword text:", text)
+        kw_end = ["I'm out", "peace out"] if self.speech_lang != "cs-CZ" else ["díky", "jedeš"]
+    
+        if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
+            text = re.sub(rf"\b(díky|Díky|jedeš|Jedeš|I'm out|peace out|Peace out)\b", "", text)
+            text = text.strip()
+            print("Matched, returning:", text)
+            return text
+
+        print("Didn't match, returning:", text)
+        return text
+
 
 # Stavba / Generovanie / Karaoke
 if __name__ == "__main__":
-    App(speech_lang=SPEECH_LANG).run()
+    App(speech_lang=SPEECH_CS).run()
