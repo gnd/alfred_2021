@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-# Note: Run as `python3 seven-eleven.py 2>/dev/null` to redirect stderr
-#       to hide pyaudio warnings from the MicrophoneStream.
-
 from __future__ import division
 
 import re
@@ -21,9 +18,8 @@ from google.cloud import speech
 from google.cloud import texttospeech
 from google.cloud import translate_v2 as translate
 
-import utils
 from stt_loop import processMicrophoneStream
-from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep, concat
+from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word
 
 from display_sender import DisplaySender
 from display_manager import DisplayManager
@@ -49,8 +45,11 @@ TRANSCRIPTION_PORT = 5000
 DEBUG_HOST = "127.0.0.1"
 DEBUG_PORT = 5432
 
-FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
+# FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
+FONT_FILE = "./fonts/Newsreader_36pt-Medium.ttf"
 MAX_WORDS = 24
+
+PAUSE_LENGTH = 2 # If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
 
 SPEECH_CODE_TO_LANG_CODE = {
     "cs-CZ": "cs",
@@ -139,8 +138,8 @@ def text_to_speech(text):
     start = time.time()
     _text_to_speech(text)
     end = time.time()
-    print("(text to speech)   ", colored(utils.elapsed_time(start, end), "magenta"))
-    send_simple_msg(f"(text to speech)    {utils.elapsed_time(start, end)}")
+    print("(text to speech)   ", colored(elapsed_time(start, end), "magenta"))
+    send_simple_msg(f"(text to speech)    {elapsed_time(start, end)}")
 
 def play_audio():
     print("Playing audio...")
@@ -157,8 +156,8 @@ def translate_response(response):
     res = translate_client.translate(response, target_language=getLangCode(OUTPUT_SPEECH_LANG))
     res = res["translatedText"]
     end = time.time()
-    print("(translation)   ", colored(utils.elapsed_time(start, end), "magenta"))
-    send_simple_msg(f"(translation)    {utils.elapsed_time(start, end)}")
+    print("(translation)   ", colored(elapsed_time(start, end), "magenta"))
+    send_simple_msg(f"(translation)    {elapsed_time(start, end)}")
     return res
 
 def log_gpt3_response(msg):
@@ -194,8 +193,8 @@ def do_with_hypothesis(hypothesis):
         hypothesis = translate_client.translate(hypothesis, target_language="en")
         hypothesis = hypothesis["translatedText"] 
         end = time.time()
-        print("(translation)   ", colored(utils.elapsed_time(start, end), "magenta"))
-        send_simple_msg(f"(translation)    {utils.elapsed_time(start, end)}")
+        print("(translation)   ", colored(elapsed_time(start, end), "magenta"))
+        send_simple_msg(f"(translation)    {elapsed_time(start, end)}")
 
     hypothesis = hypothesis.capitalize()
     pyellow(hypothesis + "\n")
@@ -221,7 +220,7 @@ def do_with_hypothesis(hypothesis):
         end = time.time()
         
         out_text = gpt3_resp["choices"][0]["text"]
-        out_text = utils.normalize_text(out_text)
+        out_text = normalize_text(out_text)
     
         # Postprocess translated text
         out_text = out_text.lstrip(". ")               # remove leftover dots and spaces from the beggining
@@ -231,7 +230,7 @@ def do_with_hypothesis(hypothesis):
         # Print response stats
         prainbow(
             ["(GPT-3 response)", "w"],
-            ["   " + utils.elapsed_time(start, end), "m"],
+            ["   " + elapsed_time(start, end), "m"],
             [f'   {len(gpt3_resp["choices"][0]["text"])} chars', "c"],
             ["   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4), "y"],
             [f'   {len(response)} chars clean', "g"],
@@ -262,7 +261,7 @@ def do_with_hypothesis(hypothesis):
 
     log_gpt3_response("".join([
             f"(GPT-3 response)",
-            "   " + utils.elapsed_time(start, end),
+            "   " + elapsed_time(start, end),
             f'   {len(gpt3_resp["choices"][0]["text"])} chars',
             "   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4),
             f'   {len(response)} chars clean',
@@ -277,7 +276,7 @@ def do_with_hypothesis(hypothesis):
     print()
 
 class App:
-    def __init__(self, speech_lang=SPEECH_LANG):
+    def __init__(self, speech_lang=SPEECH_LANG, reset_pause=PAUSE_LENGTH):
         self.text_buffer = ""
         self.prev_text_buffer = ""
         self.text_buffer_window = ""
@@ -296,6 +295,9 @@ class App:
             FONT_FILE
         )
         self.dm = DisplayManager(self, self.display, padding=(150, 200))
+
+        self.last_sent_time = 0
+        self.reset_pause = reset_pause
         
     def run(self):
         while True:
@@ -313,7 +315,7 @@ class App:
             pgreen(text)
 
             # Stop word clears the text
-            if utils.recognize_stop_word(text):
+            if recognize_stop_word(text):
                 self.dm.clear()
                 self.reset_buffer()
                 self.reset_trans_buffer()
@@ -349,6 +351,14 @@ class App:
             overwrite_chars = " " * (num_chars_printed - len(transcript))
 
             transcript = replace_punct(transcript)
+            
+            # This part clears the display and starts writing from the top
+            # if there was a longer pause.
+            t = time.time()
+            if t - self.last_sent_time > self.reset_pause:
+                self.text_buffer_window = ""
+                self.trans_buffer_window = ""
+            self.last_sent_time = t
 
             if not result.is_final:
                 sys.stdout.write(transcript + overwrite_chars + "\r")    
@@ -390,28 +400,29 @@ class App:
 
         # Translates entire buffer each time.
         translation = translate_client.translate(
-            self.text_buffer,
+            self.text_buffer_window,
             target_language="en"
         )["translatedText"]
-        translation = utils.sanitize_translation(translation)
+        translation = sanitize_translation(translation)
 
         # This is probably not thread-safe
-        if self.window_wiped_flag:
-            self.window_wiped_flag = False
-            # Transcription window was wiped, we've got to wipe the
-            # translation window too.
-            # But we don't know what part of the translation corresponds
-            # to the currently displayed transcription. 
-            # We've got to guess...
-            transcript_len = len(text.split(" "))
-            trans_words = translation.split(" ")
-            translation_len = len(trans_words)
-            if transcript_len > translation_len:
-                self.trans_buffer_window = translation
-            else:
-                self.trans_buffer_window = " ".join(trans_words[-transcript_len:])
-        else:
-            self.trans_buffer_window = translation
+        # if self.window_wiped_flag:
+        #     self.window_wiped_flag = False
+        #     # Transcription window was wiped, we've got to wipe the
+        #     # translation window too.
+        #     # But we don't know what part of the translation corresponds
+        #     # to the currently displayed transcription. 
+        #     # We've got to guess...
+        #     transcript_len = len(text.split(" "))
+        #     trans_words = translation.split(" ")
+        #     translation_len = len(trans_words)
+        #     if transcript_len > translation_len:
+        #         self.trans_buffer_window = translation
+        #     else:
+        #         self.trans_buffer_window = " ".join(trans_words[-transcript_len:])
+        # else:
+        #     self.trans_buffer_window = translation
+        self.trans_buffer_window = translation
 
         self.trans_buffer = translation
         self.dm.display_translation()

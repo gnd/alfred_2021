@@ -1,3 +1,4 @@
+import time
 from utils import concat
 
 class DisplayManager:
@@ -21,9 +22,10 @@ class DisplayManager:
             padding_top=self.padding_top,
             padding_left=self.padding_left,
         )
+        self.app.last_sent_time = time.time()
 
     def display_intermediate(self, text):
-        buf = self.app.text_buffer_window if self.app.text_buffer_window else self.app.text_buffer
+        buf = self.app.text_buffer_window if self.app.text_buffer_window is not None else self.app.text_buffer
         msg = (concat(buf, text)).strip()
         fill = True if not self.top_bottom_split else False
         self.d.send(
@@ -34,9 +36,10 @@ class DisplayManager:
             padding_top=self.padding_top,
             padding_left=self.padding_left,
         )
+        self.app.last_sent_time = time.time()
 
     def display_translation(self):
-        msg = self.app.trans_buffer_window if self.app.trans_buffer_window else self.app.trans_buffer
+        msg = self.app.trans_buffer_window if self.app.trans_buffer_window is not None else self.app.trans_buffer
         self.d.send(
             text_bottom=msg,
             fill=False,
