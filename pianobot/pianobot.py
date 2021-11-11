@@ -45,12 +45,12 @@ def cycle_pin(pin, high_time):
     GPIO.output(pin, GPIO.LOW)
 
 def noteon(s, x, y):
-    print("ON s: {} x: {} y: {}")
+    print("ON s: {} x: {} y: {}".format(s, x, y))
     #GPIO.output(pin, GPIO.HIGH)
     pass
 
 def noteoff(s, x, y):
-    print("OFF s: {} x: {} y: {}")
+    print("OFF s: {} x: {} y: {}".format(s, x, y))
     #GPIO.output(pin, GPIO.LOW)
     pass    
     
