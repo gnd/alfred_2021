@@ -16,4 +16,4 @@ if __name__ == "__main__":
     TongueTwister().run()
 
     # Stavba / Generovanie / Karaoke
-    App(speech_lang=SPEECH_LANG).run()
+    App(speech_lang="cs-CZ").run()
