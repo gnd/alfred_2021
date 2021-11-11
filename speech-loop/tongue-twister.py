@@ -32,7 +32,7 @@ TRANSCRIPTION_HOST = "127.0.0.1"
 TRANSCRIPTION_PORT = 5000
 
 class TongueTwister:
-    def __init__(self, speech_lang="en-US"):
+    def __init__(self, speech_lang="en-US", exit_word="Showtime"):
         self.text_buffer = ""
         self.prev_text_buffer = ""
 
@@ -43,9 +43,11 @@ class TongueTwister:
             TRANSCRIPTION_PORT
         )
         self.dm = DisplayManager(self, self.display, False, "left", (10, 10))
+
+        self.exit_word = exit_word
         
     def run(self):
-        while self.text_buffer.find("Showtime") == -1:
+        while self.text_buffer.find(self.exit_word) == -1:
             if self.text_buffer == "":
                 pcyan("Listening :)\n")
 
