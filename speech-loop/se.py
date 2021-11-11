@@ -286,7 +286,7 @@ class App:
             TRANSCRIPTION_PORT,
             FONT_FILE
         )
-        self.dm = DisplayManager(self, self.display, padding=(150, 100))
+        self.dm = DisplayManager(self, self.display, padding=(150, 200))
         
     def run(self):
         while True:
@@ -373,6 +373,7 @@ class App:
             self.text_buffer,
             target_language="en"
         )["translatedText"]
+        self.trans_buffer = utils.sanitize_translation(self.trans_buffer)
         
         self.dm.display_translation()
 

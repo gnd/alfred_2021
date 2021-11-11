@@ -76,3 +76,7 @@ def normalize_text(text):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
     return text
+
+def sanitize_translation(text):
+    t = text.replace("&#39;", "'")
+    return t
