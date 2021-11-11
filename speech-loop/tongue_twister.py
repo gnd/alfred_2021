@@ -45,6 +45,8 @@ class TongueTwister:
         self.dm = DisplayManager(self, self.display, False, "left", (10, 10))
 
         self.exit_word = exit_word
+
+        self.text_buffer_window = None
         
     def run(self):
         while self.text_buffer.find(self.exit_word) == -1:

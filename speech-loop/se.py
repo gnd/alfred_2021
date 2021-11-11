@@ -23,12 +23,14 @@ from google.cloud import translate_v2 as translate
 
 import utils
 from stt_loop import processMicrophoneStream
-from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
+from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep, concat
 
 from display_sender import DisplaySender
 from display_manager import DisplayManager
 
 from tongue_twister import TongueTwister
+
+from kw_parser import replace_punct
 
 SPEECH_LANG = "cs-CZ"
 OUTPUT_SPEECH_LANG = "cs-CZ"
@@ -48,6 +50,7 @@ DEBUG_HOST = "127.0.0.1"
 DEBUG_PORT = 5432
 
 FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
+MAX_WORDS = 24
 
 SPEECH_CODE_TO_LANG_CODE = {
     "cs-CZ": "cs",
@@ -277,7 +280,13 @@ class App:
     def __init__(self, speech_lang=SPEECH_LANG):
         self.text_buffer = ""
         self.prev_text_buffer = ""
+        self.text_buffer_window = ""
+
+        self.max_words = 24
+        self.window_wiped_flag = False
+
         self.trans_buffer = ""
+        self.trans_buffer_window = ""
 
         self.speech_lang = speech_lang
 
@@ -286,7 +295,7 @@ class App:
             TRANSCRIPTION_PORT,
             FONT_FILE
         )
-        self.dm = DisplayManager(self, self.display, padding=(150, 200), max_words=24)
+        self.dm = DisplayManager(self, self.display, padding=(150, 200))
         
     def run(self):
         while True:
@@ -316,7 +325,7 @@ class App:
                 
                 self.push_to_buffer(text)
                 self.dm.display()
-                
+
                 do_with_hypothesis(self.text_buffer)
                 
                 self.dm.clear()
@@ -338,6 +347,9 @@ class App:
                 continue
             transcript = result.alternatives[0].transcript
             overwrite_chars = " " * (num_chars_printed - len(transcript))
+
+            transcript = replace_punct(transcript)
+
             if not result.is_final:
                 sys.stdout.write(transcript + overwrite_chars + "\r")    
                 self.dm.display_intermediate(transcript)
@@ -350,17 +362,24 @@ class App:
                 return (transcript + overwrite_chars + "\n")
 
     def push_to_buffer(self, text):
-        self.text_buffer = (self.text_buffer + " " + text).strip()
+        self.text_buffer = (concat(self.text_buffer, text)).strip()
+        if len(self.text_buffer_window.split(" ")) > self.max_words:
+            self.text_buffer_window = text.strip()
+            self.window_wiped_flag = True
+        else:
+            self.text_buffer_window = (concat(self.text_buffer_window, text)).strip()
 
     def reset_buffer(self):
         self.prev_text_buffer = self.text_buffer
         self.text_buffer = ""
+        self.text_buffer_window = ""
 
     def push_to_trans_buffer(self, text):
-        self.trans_buffer = (self.trans_buffer + " " + text).strip()
+        self.trans_buffer = (concat(self.trans_buffer, text)).strip()
 
     def reset_trans_buffer(self):
         self.trans_buffer = ""
+        self.trans_buffer_window = ""
 
     def translate_cs(self, text):
         # t = translate_client.translate(
@@ -370,12 +389,31 @@ class App:
         # self.push_to_trans_buffer(t)
 
         # Translates entire buffer each time.
-        self.trans_buffer = translate_client.translate(
+        translation = translate_client.translate(
             self.text_buffer,
             target_language="en"
         )["translatedText"]
-        self.trans_buffer = utils.sanitize_translation(self.trans_buffer)
-        
+        translation = utils.sanitize_translation(translation)
+
+        # This is probably not thread-safe
+        if self.window_wiped_flag:
+            self.window_wiped_flag = False
+            # Transcription window was wiped, we've got to wipe the
+            # translation window too.
+            # But we don't know what part of the translation corresponds
+            # to the currently displayed transcription. 
+            # We've got to guess...
+            transcript_len = len(text.split(" "))
+            trans_words = translation.split(" ")
+            translation_len = len(trans_words)
+            if transcript_len > translation_len:
+                self.trans_buffer_window = translation
+            else:
+                self.trans_buffer_window = " ".join(trans_words[-transcript_len:])
+        else:
+            self.trans_buffer_window = translation
+
+        self.trans_buffer = translation
         self.dm.display_translation()
 
     def display_translation_async(self, text):

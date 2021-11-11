@@ -3,6 +3,8 @@ import re
 import six
 from termcolor import cprint, colored
 
+from kw_parser import replace_punct
+
 CHARS_PER_TOK = 4
 CZK_PER_USD = 21.93
 USD_PER_1000_TOKS = 0.06 # for Davinci
@@ -80,3 +82,13 @@ def normalize_text(text):
 def sanitize_translation(text):
     t = text.replace("&#39;", "'")
     return t
+
+def concat(a, b):
+    a.strip()
+    b = replace_punct(b)
+    b = b.strip()
+    if len(b) > 0:
+        if b[0] == "." or b[0] == "?" or b[0] == "!" or b[0] == ",":
+            return a + b
+        else:
+            return a + " " + b
