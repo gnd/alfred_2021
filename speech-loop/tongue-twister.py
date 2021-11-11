@@ -45,7 +45,7 @@ class TongueTwister:
         self.dm = DisplayManager(self, self.display, False, "left", (10, 10))
         
     def run(self):
-        while True:
+        while self.text_buffer.find("Showtime") == -1:
             if self.text_buffer == "":
                 pcyan("Listening :)\n")
 
@@ -67,6 +67,9 @@ class TongueTwister:
 
             self.push_to_buffer(text)
             self.dm.display()
+        
+        # Will return once "Showtime" is detected in the transcription.
+        return
 
     def handle_stt_response(self, responses):
         num_chars_printed = 0
