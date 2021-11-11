@@ -67,8 +67,8 @@ if __name__ == "__main__":
 
     # Associate Python functions with message address patterns, using default
     # argument scheme OSCARG_DATAUNPACK.
-    osc_method("/noteon", noteon)
-    osc_method("/noteoff", noteoff)
+    osc_method("/note/*", noteon)
+    osc_method("/note/off", noteoff)
 
     # Periodically call osc4py3 processing method in your event loop.
     finished = False
