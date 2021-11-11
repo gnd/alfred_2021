@@ -56,8 +56,8 @@ def noteoff(s, x, y):
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", default="127.0.0.1", help="The ip to listen on")
-    parser.add_argument("--port", type=int, default=5005, help="The port to listen on")
+    parser.add_argument("--ip", default="192.168.1.102", help="The ip to listen on")
+    parser.add_argument("--port", type=int, default=6666, help="The port to listen on")
     args = parser.parse_args()
   
     osc_startup()
@@ -67,8 +67,8 @@ if __name__ == "__main__":
 
     # Associate Python functions with message address patterns, using default
     # argument scheme OSCARG_DATAUNPACK.
-    osc_method("/noteon/*", noteon)
-    osc_method("/noteoff/*", noteoff)
+    osc_method("/noteon", noteon)
+    osc_method("/noteoff", noteoff)
 
     # Periodically call osc4py3 processing method in your event loop.
     finished = False
