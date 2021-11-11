@@ -64,7 +64,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
 
         # render text to screen - use ptext for easy text wrapping
         if fill:
-            screen.fill((255,255,255))
+            screen.fill((255,255,255), (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
         if fill_top:
             screen.fill((255,255,255), (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2))
         if fill_bottom:

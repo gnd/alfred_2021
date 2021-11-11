@@ -99,7 +99,7 @@ class GPT3Client:
         if self.output_speech_lang != "en-US":
             y = self.translate_response(y)
 
-        self.gpt3_resp = y
+        self.app.gpt3_resp = y
 
         self.text_to_speech(y)
 

@@ -58,7 +58,6 @@ def text_to_crowns(text):
 def text_coda(text):
     return f'\nThis text cost {text_to_crowns(text)} crowns.'
 
-
 def recognize_stop_word(text):
     if re.search(r"\b(quit|exit|sorry)\b", text, re.I):
         pmagenta(",.-~*´¨¯¨`*·~-.¸-( Stopword Detected )-,.-~*´¨¯¨`*·~-.¸")
@@ -128,3 +127,11 @@ class LangCode:
 
 def getLangCode(speech_code):
     return SPEECH_CODE_TO_LANG_CODE.get(speech_code)
+
+def delete_word(text):
+    """Deletes the last word from `text`."""
+    text = text.split()
+    if len(text) > 0:
+        return " ".join(text[:-1])
+    else:
+        return text

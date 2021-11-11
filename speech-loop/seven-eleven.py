@@ -77,25 +77,6 @@ def getLangCode(speech_code):
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
 
-class State:
-    def __init__(
-        self,
-        speech_lang=SPEECH_LANG,
-        output_speech_lang=OUTPUT_SPEECH_LANG,
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS,
-        engine=ENGINE,
-    ):
-        self.speech_lang = speech_lang
-        self.output_speech_lang = output_speech_lang
-        
-        self.buffer = ""
-        self.prev_buffer = ""
-        
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-        self.engine = engine
-
 def send_text(text):
     global TEXT_BUFFER
     sock = socket.socket()
@@ -676,6 +657,7 @@ def listen_print_loop(responses):
             sys.stdout.flush()
             num_chars_printed = len(transcript)
         else:
+            send_text(transcript)
             return (transcript + overwrite_chars + "\n")
 
 def main(speech_lang=SPEECH_LANG):
@@ -732,10 +714,10 @@ def main(speech_lang=SPEECH_LANG):
             continue
 
         if recognize_continue(text):
-            TEXT_BUFFER = PREV_BUFFER + " " + GPT3_RESP
-            do_with_hypothesis(TEXT_BUFFER)
-            reset_buffer()
-            continue
+                TEXT_BUFFER = PREV_BUFFER + " " + GPT3_RESP
+                do_with_hypothesis(TEXT_BUFFER)
+                reset_buffer()
+                continue
 
         if recognize_delete(text):
             push_to_buffer(text)

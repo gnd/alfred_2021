@@ -16,13 +16,14 @@ from google.cloud import translate_v2 as translate
 
 from stt_loop import processMicrophoneStream
 from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word
+from utils import delete_word
 
 from display_sender import DisplaySender
 from display_manager import DisplayManager
 
 from tongue_twister import TongueTwister
 
-from kw_parser import replace_punct
+from kw_parser import replace_punct, recognize_kws
 
 from gpt3 import GPT3Client
 
@@ -54,14 +55,6 @@ def chop_endword(text):
     print("Didn't match, returning:", text)
     return text
 
-def recognize_speech_end(text):
-    kw_end = ["I'm out", "peace out"] if SPEECH_LANG != "cs-CZ" else ["díky", "jedeš"]
-    
-    if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
-        pyellow("> speech end")
-        return True
-    return False
-
 class App:
     def __init__(self, speech_lang=SPEECH_LANG, reset_pause=PAUSE_LENGTH):
         self.text_buffer = ""
@@ -81,7 +74,7 @@ class App:
             TRANSCRIPTION_PORT,
             FONT_FILE
         )
-        self.dm = DisplayManager(self, self.display, padding=(150, 200))
+        self.dm = DisplayManager(self, self.display, padding=(180, 230))
 
         self.last_sent_time = 0
         self.reset_pause = reset_pause
@@ -100,7 +93,7 @@ class App:
 
             # Blocks to process audio from the mic. This function continues
             # once the end of the utterance has been recognized.        
-            text = processMicrophoneStream(
+            (text, kw_dict) = processMicrophoneStream(
                 self.speech_lang,
                 self.handle_stt_response
             )
@@ -109,14 +102,38 @@ class App:
             pgreen(text)
 
             # Stop word clears the text
-            if recognize_stop_word(text):
+            if kw_dict.get("clear"):
                 self.dm.clear()
                 self.reset_buffer()
                 self.reset_trans_buffer()
                 continue
-
-            # Once speech end is recognized, text is sent to GPT-3
-            if recognize_speech_end(text):
+            if kw_dict.get("delete"):
+                self.push_to_buffer(text)
+                kw_del = ["delete", "Delete"] if self.speech_lang == "en-US" else ["smazat", "Smazat"]
+                num_dels = self.text_buffer.count(kw_del[0]) + self.text_buffer.count(kw_del[1])
+                # Delete `num_dels` words and additionally all "delete"s.
+                for x in range(num_dels * 2):
+                    self.text_buffer = utils.delete_word(self.text_buffer)
+                self.dm.display()
+                self.display_translation_async()
+                continue
+            if kw_dict.get("repeat"):
+                self.text_buffer = self.prev_text_buffer
+                self.dm.clear()
+                self.gpt3.feed(self.text_buffer)
+                self.dm.clear()
+                self.reset_buffer()
+                self.reset_trans_buffer()
+                continue
+            if kw_dict.get("continue"):
+                self.text_buffer = concat(self.prev_text_buffer, self.gpt3_resp)
+                self.dm.clear()
+                self.gpt3.feed(self.text_buffer)
+                self.dm.clear()
+                self.reset_buffer()
+                self.reset_trans_buffer()
+                continue
+            if kw_dict.get("submit"):
                 text = chop_endword(text)
 
                 self.push_to_buffer(text)
@@ -147,6 +164,8 @@ class App:
             overwrite_chars = " " * (num_chars_printed - len(transcript))
 
             transcript = replace_punct(transcript)
+            kw_dict = recognize_kws(transcript)
+            print(kw_dict)
             
             # This part clears the display and starts writing from the top
             # if there was a longer pause.
@@ -162,10 +181,14 @@ class App:
 
                 sys.stdout.flush()
                 num_chars_printed = len(transcript)
+                
+                for v in kw_dict.values():
+                    if v:
+                        return ((transcript + overwrite_chars + "\n"), kw_dict)
             else:
                 self.dm.display_intermediate(transcript)
-
-                return (transcript + overwrite_chars + "\n")
+                return ((transcript + overwrite_chars + "\n"), kw_dict)
+                
 
     def push_to_buffer(self, text):
         self.text_buffer = (concat(self.text_buffer, text)).strip()
