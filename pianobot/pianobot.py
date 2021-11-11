@@ -40,10 +40,12 @@ GPIO.setup(sol_12, GPIO.OUT, initial=GPIO.LOW)
 
 # simple cycle function
 def cycle_pin(pin, high_time):
+    print("PIN ON: {}".format(pin))
     GPIO.output(pin, GPIO.HIGH)
     sleep(high_time)
+    print("PIN OFF: {}".format(pin))
     GPIO.output(pin, GPIO.LOW)
-
+    
 def noteon(pin):
     print("PIN ON: {}".format(pin))
     #GPIO.output(pin, GPIO.HIGH)
