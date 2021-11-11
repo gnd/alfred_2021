@@ -69,23 +69,25 @@ if __name__ == "__main__":
     # argument scheme OSCARG_DATAUNPACK.
     osc_method("/note/*", noteon)
     osc_method("/note/off", noteoff)
+    
+    # self test
+    cycle_pin(sol_01, 0.5)
+    cycle_pin(sol_02, 0.5)
+    cycle_pin(sol_03, 0.5)
+    cycle_pin(sol_04, 0.5)
+    cycle_pin(sol_05, 0.5)
+    cycle_pin(sol_06, 0.5)
+    cycle_pin(sol_07, 0.5)
+    cycle_pin(sol_08, 0.5)
+    cycle_pin(sol_09, 0.5)
+    cycle_pin(sol_10, 0.5)
+    cycle_pin(sol_11, 0.5)
+    cycle_pin(sol_12, 0.5)
 
     # Periodically call osc4py3 processing method in your event loop.
     finished = False
     while not finished:
         osc_process()
-        cycle_pin(sol_01, 0.5)
-        cycle_pin(sol_02, 0.5)
-        cycle_pin(sol_03, 0.5)
-        cycle_pin(sol_04, 0.5)
-        cycle_pin(sol_05, 0.5)
-        cycle_pin(sol_06, 0.5)
-        cycle_pin(sol_07, 0.5)
-        cycle_pin(sol_08, 0.5)
-        cycle_pin(sol_09, 0.5)
-        cycle_pin(sol_10, 0.5)
-        cycle_pin(sol_11, 0.5)
-        cycle_pin(sol_12, 0.5)
-
+        
     # Properly close the system
     osc_terminate()
