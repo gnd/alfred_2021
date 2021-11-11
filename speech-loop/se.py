@@ -85,13 +85,16 @@ client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
 
 def chop_endword(text):
+    print("CHop endword text:", text)
     kw_end = ["I'm out", "peace out"] if SPEECH_LANG != "cs-CZ" else ["díky", "jedeš"]
     
     if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
         text = re.sub(rf"\b(({kw_end[0]})|({kw_end[1]}))\b", "", text)
         text = text.strip()
+        print("Matched, returning:", text)
         return text
 
+    print("Didn't match, returning:", text)
     return text
 
 def recognize_speech_end(text):
@@ -118,7 +121,7 @@ def _text_to_speech(text):
         language_code=OUTPUT_SPEECH_LANG, ssml_gender=pick_voice_randomly()
     )
     audio_config = texttospeech.AudioConfig(
-        speaking_rate=0.75, # 0.5 - 4.0
+        speaking_rate=0.9 # 0.75, # 0.5 - 4.0
         effects_profile_id=['medium-bluetooth-speaker-class-device'],
         audio_encoding=texttospeech.AudioEncoding.MP3,
         pitch=0, # 20 for dying patient voice
@@ -133,13 +136,13 @@ def _text_to_speech(text):
 
 def text_to_speech(text):
     print("Converting text to speech...")
-    send_simple_msg("Converting text to speech...")
+    # send_simple_msg("Converting text to speech...")
     # Convert continuation to speech
     start = time.time()
     _text_to_speech(text)
     end = time.time()
     print("(text to speech)   ", colored(elapsed_time(start, end), "magenta"))
-    send_simple_msg(f"(text to speech)    {elapsed_time(start, end)}")
+    # send_simple_msg(f"(text to speech)    {elapsed_time(start, end)}")
 
 def play_audio():
     print("Playing audio...")
@@ -151,19 +154,19 @@ def play_audio():
 
 def translate_response(response):
     print("Translating response...")
-    send_simple_msg("Translating GPT-3 response...")
+    # send_simple_msg("Translating GPT-3 response...")
     start = time.time()
     res = translate_client.translate(response, target_language=getLangCode(OUTPUT_SPEECH_LANG))
     res = res["translatedText"]
     end = time.time()
     print("(translation)   ", colored(elapsed_time(start, end), "magenta"))
-    send_simple_msg(f"(translation)    {elapsed_time(start, end)}")
+    # send_simple_msg(f"(translation)    {elapsed_time(start, end)}")
     return res
 
 def log_gpt3_response(msg):
     """ `nc -lkv 5432` to listen. """
 
-    send_simple_msg(msg)
+    # send_simple_msg(msg)
 
     s = socket.socket()
     try:
@@ -173,107 +176,6 @@ def log_gpt3_response(msg):
         pass
     finally:
         s.close()
-
-def do_with_hypothesis(hypothesis):
-    pred(">>>>>>>>> DO WITH HYPOTHESIS")
-    global GPT3_RESP
-
-    if len(hypothesis) == 0:
-        send_simple_msg("Hypothesis empty")
-        pred("\nHypothesis empty\n")
-        return
-
-    os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of recording
-
-    # Translate hypothesis from Czech to English.
-    if SPEECH_LANG != "en-US":
-        start = time.time()
-        send_simple_msg("Translating hypothesis...")
-        print("Translating hypothesis...")
-        hypothesis = translate_client.translate(hypothesis, target_language="en")
-        hypothesis = hypothesis["translatedText"] 
-        end = time.time()
-        print("(translation)   ", colored(elapsed_time(start, end), "magenta"))
-        send_simple_msg(f"(translation)    {elapsed_time(start, end)}")
-
-    hypothesis = hypothesis.capitalize()
-    pyellow(hypothesis + "\n")
-    print("Sending text to GPT-3...")
-    send_simple_msg(f"set_gpt: {hypothesis}")
-
-    # Generate continuation
-
-    # hypothesis = hypothesis + ":\n\n"
-    
-    response = ""
-    num_blanks = 0
-    max_blanks = 3
-    while len(response.strip()) < 1 and num_blanks < MAX_SUCC_BLANKS:
-        start = time.time()
-        gpt3_resp = openai.Completion.create(
-            engine=ENGINE,
-            prompt=hypothesis,
-            max_tokens=MAX_TOKENS,
-            temperature=TEMPERATURE,
-            # stop=["\n\n"] 
-        )
-        end = time.time()
-        
-        out_text = gpt3_resp["choices"][0]["text"]
-        out_text = normalize_text(out_text)
-    
-        # Postprocess translated text
-        out_text = out_text.lstrip(". ")               # remove leftover dots and spaces from the beggining
-        response = out_text.replace("&quot;","")       # remove "&quot;"
-        response = response.strip()
-
-        # Print response stats
-        prainbow(
-            ["(GPT-3 response)", "w"],
-            ["   " + elapsed_time(start, end), "m"],
-            [f'   {len(gpt3_resp["choices"][0]["text"])} chars', "c"],
-            ["   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4), "y"],
-            [f'   {len(response)} chars clean', "g"],
-            ["   {:.3f} tokens clean".format(len(response) / 4), "r"],
-            ["   {:.3f} tokens total".format((len(response) + len(hypothesis)) / 4), "b"]
-        )
-
-        if len(response) < 1:
-            print("Received blank response :(")
-            num_blanks = num_blanks + 1
-
-    if num_blanks == MAX_SUCC_BLANKS:
-        response = random.choice([
-            "Try again.",
-            "Sorry, can you please try again.",
-            "I don't understand. Please try again.",
-            "Sorry, what?"
-        ])
-    else:
-        pblue(response)
-
-    if OUTPUT_SPEECH_LANG != "en-US":
-        response = translate_response(response)
-
-    GPT3_RESP = response
-
-    text_to_speech(response)
-
-    log_gpt3_response("".join([
-            f"(GPT-3 response)",
-            "   " + elapsed_time(start, end),
-            f'   {len(gpt3_resp["choices"][0]["text"])} chars',
-            "   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4),
-            f'   {len(response)} chars clean',
-            "   {:.3f} tokens clean".format(len(response) / 4),
-            "   {:.3f} tokens total".format((len(response) + len(hypothesis)) / 4),
-            f"   {len(response.split())} words"
-        ]))
-
-    play_audio()
-
-    os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of response
-    print()
 
 class App:
     def __init__(self, speech_lang=SPEECH_LANG, reset_pause=PAUSE_LENGTH):
@@ -298,6 +200,8 @@ class App:
 
         self.last_sent_time = 0
         self.reset_pause = reset_pause
+
+        self.gpt3_resp = ""
         
     def run(self):
         while True:
@@ -324,11 +228,11 @@ class App:
             # Once speech end is recognized, text is sent to GPT-3
             if recognize_speech_end(text):
                 text = chop_endword(text)
-                
+
                 self.push_to_buffer(text)
                 self.dm.display()
 
-                do_with_hypothesis(self.text_buffer)
+                self.feed_gpt3(self.text_buffer)
                 
                 self.dm.clear()
                 self.reset_buffer()
@@ -392,36 +296,15 @@ class App:
         self.trans_buffer_window = ""
 
     def translate_cs(self, text):
-        # t = translate_client.translate(
-        #     text,
-        #     target_language="cs"
-        # )["translatedText"]
-        # self.push_to_trans_buffer(t)
-
-        # Translates entire buffer each time.
+        pyellow(f"Translating text: {text}")
         translation = translate_client.translate(
             self.text_buffer_window,
             target_language="en"
         )["translatedText"]
+        pyellow(f"Received: {translation}")
         translation = sanitize_translation(translation)
+        pyellow(f"After sanitization: {translation}")
 
-        # This is probably not thread-safe
-        # if self.window_wiped_flag:
-        #     self.window_wiped_flag = False
-        #     # Transcription window was wiped, we've got to wipe the
-        #     # translation window too.
-        #     # But we don't know what part of the translation corresponds
-        #     # to the currently displayed transcription. 
-        #     # We've got to guess...
-        #     transcript_len = len(text.split(" "))
-        #     trans_words = translation.split(" ")
-        #     translation_len = len(trans_words)
-        #     if transcript_len > translation_len:
-        #         self.trans_buffer_window = translation
-        #     else:
-        #         self.trans_buffer_window = " ".join(trans_words[-transcript_len:])
-        # else:
-        #     self.trans_buffer_window = translation
         self.trans_buffer_window = translation
 
         self.trans_buffer = translation
@@ -431,8 +314,104 @@ class App:
         t = threading.Thread(target=self.translate_cs, args=(text,))
         t.start()
 
+    def feed_gpt3(self, x):
+        if len(x) == 0:
+            # self.dm.display("Hypothesis empty")
+            pred("\nHypothesis empty\n")
+            return
+
+        os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of recording
+
+        pred(f"GPT-3 input: {x}")
+
+        # Translate hypothesis from Czech to English.
+        if self.speech_lang != "en-US":
+            start = time.time()
+            # self.dm.display("Translating hypothesis...")
+            print("Translating hypothesis...")
+            x = translate_client.translate(x, target_language="en")
+            x = x["translatedText"] 
+            end = time.time()
+            print("(translation)   ", colored(elapsed_time(start, end), "magenta"))
+
+        x = x.capitalize()
+        pyellow(x + "\n")
+        print("Sending text to GPT-3...")
+        # self.dm.display(f"set_gpt: {x}")
+
+        # Generate continuation
+        y = ""
+        num_blanks = 0
+        max_blanks = 3
+        while len(y.strip()) < 1 and num_blanks < MAX_SUCC_BLANKS:
+            start = time.time()
+            resp = openai.Completion.create(
+                engine=ENGINE,
+                prompt=x,
+                max_tokens=MAX_TOKENS,
+                temperature=TEMPERATURE,
+            )
+            end = time.time()
+        
+            y = resp["choices"][0]["text"]
+            y = normalize_text(y)
+    
+            # Postprocess translated text
+            y = y.lstrip(". ")               # remove leftover dots and spaces from the beggining
+            y = y.replace("&quot;","")       # remove "&quot;"
+            y = y.strip()
+
+            # Print response stats
+            prainbow(
+                ["(GPT-3 response)", "w"],
+                ["   " + elapsed_time(start, end), "m"],
+                [f'   {len(resp["choices"][0]["text"])} chars', "c"],
+                ["   {:.3f} tokens".format(len(resp["choices"][0]["text"]) / 4), "y"],
+                [f'   {len(y)} chars clean', "g"],
+                ["   {:.3f} tokens clean".format(len(y) / 4), "r"],
+                ["   {:.3f} tokens total".format((len(y) + len(x)) / 4), "b"]
+            )
+
+            if len(y) < 1:
+                print("Received blank response :(")
+                num_blanks = num_blanks + 1
+
+        if num_blanks == MAX_SUCC_BLANKS:
+            y = random.choice([
+                "Try again.",
+                "Sorry, can you please try again.",
+                "I don't understand. Please try again.",
+                "Sorry, what?"
+            ])
+        else:
+            pblue(y)
+
+        if OUTPUT_SPEECH_LANG != "en-US":
+            y = translate_response(y)
+
+        self.gpt3_resp = y
+
+        text_to_speech(y)
+
+        # log_gpt3_response("".join([
+        #         f"(GPT-3 response)",
+        #         "   " + elapsed_time(start, end),
+        #         f'   {len(gpt3_resp["choices"][0]["text"])} chars',
+        #         "   {:.3f} tokens".format(len(gpt3_resp["choices"][0]["text"]) / 4),
+        #         f'   {len(response)} chars clean',
+        #         "   {:.3f} tokens clean".format(len(response) / 4),
+        #         "   {:.3f} tokens total".format((len(response) + len(hypothesis)) / 4),
+        #         f"   {len(response.split())} words"
+        #     ]))
+
+        play_audio()
+
+        os.system('play -nq -t alsa synth {} sine {}'.format(0.3, 440)) # Beep sound to signal end of response
+        print()
+
 if __name__ == "__main__":
     # Hra s vyslovnostou / Prepis
     TongueTwister().run()
+
     app = App(speech_lang=SPEECH_LANG)
     app.run()

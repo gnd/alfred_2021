@@ -84,7 +84,7 @@ def sanitize_translation(text):
     return t
 
 def concat(a, b):
-    a.strip()
+    a = a.strip()
     b = replace_punct(b)
     b = b.strip()
     if len(b) > 0:
@@ -92,3 +92,4 @@ def concat(a, b):
             return a + b
         else:
             return a + " " + b
+    return a
