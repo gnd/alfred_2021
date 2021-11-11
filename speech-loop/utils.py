@@ -84,6 +84,7 @@ def normalize_text(text):
 
 def sanitize_translation(text):
     t = text.replace("&#39;", "'")
+    t = text.replace("\"", "")
     t = t[0].upper() + t[1:] # Capitalize; `capitalize` sucks
     return t
 

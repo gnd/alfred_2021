@@ -109,11 +109,21 @@ class App:
                 continue
             if kw_dict.get("delete"):
                 self.push_to_buffer(text)
+
                 kw_del = ["delete", "Delete"] if self.speech_lang == "en-US" else ["smazat", "Smazat"]
+
+                # Delete in `text_buffer`
                 num_dels = self.text_buffer.count(kw_del[0]) + self.text_buffer.count(kw_del[1])
                 # Delete `num_dels` words and additionally all "delete"s.
                 for x in range(num_dels * 2):
-                    self.text_buffer = utils.delete_word(self.text_buffer)
+                    self.text_buffer = delete_word(self.text_buffer)
+
+                # Delete in `text_buffer_window`
+                num_dels = self.text_buffer_window.count(kw_del[0]) + self.text_buffer_window.count(kw_del[1])
+                # Delete `num_dels` words and additionally all "delete"s.
+                for x in range(num_dels * 2):
+                    self.text_buffer_window = delete_word(self.text_buffer_window)
+
                 self.dm.display()
                 self.display_translation_async()
                 continue
