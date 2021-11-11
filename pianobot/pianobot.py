@@ -44,13 +44,13 @@ def cycle_pin(pin, high_time):
     sleep(high_time)
     GPIO.output(pin, GPIO.LOW)
 
-def noteon(s, x, y):
-    print("ON s: {} x: {} y: {}".format(s, x, y))
+def noteon(pin):
+    print("PIN ON: {}".format(pin))
     #GPIO.output(pin, GPIO.HIGH)
     pass
 
-def noteoff(s, x, y):
-    print("OFF s: {} x: {} y: {}".format(s, x, y))
+def noteoff(pin):
+    print("PIN OFF: {}".format(pin))
     #GPIO.output(pin, GPIO.LOW)
     pass    
     
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     # Associate Python functions with message address patterns, using default
     # argument scheme OSCARG_DATAUNPACK.
-    osc_method("/note/*", noteon)
+    osc_method("/note/on", noteon)
     osc_method("/note/off", noteoff)
     
     # self test
