@@ -28,8 +28,10 @@ from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
 from display_sender import DisplaySender
 from display_manager import DisplayManager
 
-SPEECH_LANG = "en-US"
-OUTPUT_SPEECH_LANG = "en-US"
+from tongue_twister import TongueTwister
+
+SPEECH_LANG = "cs-CZ"
+OUTPUT_SPEECH_LANG = "cs-CZ"
 
 ENGINE = "davinci-instruct-beta"
 MAX_TOKENS = 200
@@ -284,7 +286,7 @@ class App:
             TRANSCRIPTION_PORT,
             FONT_FILE
         )
-        self.dm = DisplayManager(self, self.display)
+        self.dm = DisplayManager(self, self.display, padding=(150, 100))
         
     def run(self):
         while True:
@@ -369,7 +371,7 @@ class App:
 
         self.trans_buffer = translate_client.translate(
             self.text_buffer,
-            target_language="cs"
+            target_language="en"
         )["translatedText"]
         
         self.dm.display_translation()
@@ -379,5 +381,7 @@ class App:
         t.start()
 
 if __name__ == "__main__":
+    # Hra s vyslovnostou / Prepis
+    TongueTwister().run()
     app = App(speech_lang=SPEECH_LANG)
     app.run()

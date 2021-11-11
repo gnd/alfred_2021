@@ -7,16 +7,16 @@ from msg_decoder import decode_msg
 # set some globals
 # SCREEN_WIDTH = 3000
 # SCREEN_HEIGHT = 2000
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1900
+SCREEN_HEIGHT = 1000
 # TODO - automaticaly detect wlan0 ip
 #DISPLAY_HOST = "192.168.220.207"
 DISPLAY_HOST = "127.0.0.1"
 DISPLAY_PORT = 5000
 PADDING_LEFT = 50 
-PADDING_TOP = 20
+PADDING_TOP = 100
 ONCE = True
-FONT_SIZE = 64
+FONT_SIZE = 72
 
 FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
 

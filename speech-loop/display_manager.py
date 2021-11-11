@@ -1,5 +1,5 @@
 class DisplayManager:
-    def __init__(self, app, display, top_bottom_split=True, align="center", padding=(20, 50)):
+    def __init__(self, app, display, top_bottom_split=True, align="center", padding=None):
         self.app = app
         self.d = display
         self.top_bottom_split = top_bottom_split

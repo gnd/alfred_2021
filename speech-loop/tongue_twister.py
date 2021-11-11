@@ -71,6 +71,7 @@ class TongueTwister:
             self.dm.display()
         
         # Will return once "Showtime" is detected in the transcription.
+        self.dm.clear()
         return
 
     def handle_stt_response(self, responses):
