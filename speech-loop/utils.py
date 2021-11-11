@@ -77,10 +77,15 @@ def cut_to_sentence_end(text):
 def normalize_text(text):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
+
+    text = text.lstrip(". ")               # remove leftover dots and spaces from the beggining
+    text = text.replace("&quot;","")       # remove "&quot;"
+    text = text.strip()
     return text
 
 def sanitize_translation(text):
     t = text.replace("&#39;", "'")
+    t = t[0].upper() + t[1:] # Capitalize; `capitalize` sucks
     return t
 
 def concat(a, b):
@@ -93,3 +98,33 @@ def concat(a, b):
         else:
             return a + " " + b
     return a
+
+SPEECH_CODE_TO_LANG_CODE = {
+    "cs-CZ": "cs",
+    "en-US": "en",
+    "fr-FR": "fr",
+    "de-DE": "de",
+    "ru-RU": "ru",
+    "cmn-CN": "zh-CN"
+}
+
+class SpeechCode:
+    def __init__(self):
+        self.CZECH = "cs-CZ"
+        self.ENGLISH = "en-US"
+        self.FRENCH = "fr-FR"
+        self.GERMAN = "de-DE"
+        self.RUSSIAN = "ru-RU"
+        self.CHINESE = "cmn-CN"
+
+class LangCode:
+    def __init__(self):
+        self.CZECH = "cs"
+        self.ENGLISH = "en"
+        self.FRENCH = "fr"
+        self.GERMAN = "de"
+        self.RUSSIAN = "ru"
+        self.CHINESE = "zh-CN"
+
+def getLangCode(speech_code):
+    return SPEECH_CODE_TO_LANG_CODE.get(speech_code)
