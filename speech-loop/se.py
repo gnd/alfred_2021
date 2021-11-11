@@ -45,7 +45,7 @@ DEBUG_PORT = 5432
 FONT_FILE = "./fonts/Newsreader_36pt-Medium.ttf"
 MAX_WORDS = 24
 
-PAUSE_LENGTH = 2 # If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
+PAUSE_LENGTH = 10 # If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
 
 class App:
     def __init__(self, speech_lang=SPEECH_CS, reset_pause=PAUSE_LENGTH):
@@ -66,7 +66,7 @@ class App:
             TRANSCRIPTION_PORT,
             FONT_FILE
         )
-        self.dm = DisplayManager(self, self.display, padding=(180, 230))
+        self.dm = DisplayManager(self, self.display, padding=(40, 40))
 
         self.last_sent_time = 0
         self.reset_pause = reset_pause
