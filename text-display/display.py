@@ -13,7 +13,7 @@ SCREEN_HEIGHT = 600
 #DISPLAY_HOST = "192.168.220.207"
 DISPLAY_HOST = "127.0.0.1"
 DISPLAY_PORT = 5000
-PADDING = 50 
+PADDING_LEFT = 50 
 PADDING_TOP = 20
 ONCE = True
 FONT_SIZE = 64
@@ -57,6 +57,10 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
         fill = msg_dict.get("fill")
         fill_top = msg_dict.get("fill_top")
         fill_bottom = msg_dict.get("fill_bottom")
+        font_fname = msg_dict.get("font") if msg_dict.get("font") else pygame.font.get_default_font()
+        align = msg_dict.get("align")
+        padding_top = int(msg_dict.get("padding_top")) if msg_dict.get("padding_top") else PADDING_TOP
+        padding_left = int(msg_dict.get("padding_left")) if msg_dict.get("padding_left") else PADDING_LEFT
 
         # render text to screen - use ptext for easy text wrapping
         if fill:
@@ -67,9 +71,29 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
             screen.fill((255,255,255), (0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT))
 
         if text:
-            ptext.draw(text, (PADDING, PADDING_TOP), color=(0,0,0), width=SCREEN_WIDTH-2*PADDING, fontname=FONT_FILE, lineheight=1, fontsize=FONT_SIZE, align="center")
+            ptext.draw(
+                text,
+                (padding_left, padding_top),
+                color=(0,0,0),
+                width=SCREEN_WIDTH-2*padding_left,
+                fontname=font_fname,
+                lineheight=1,
+                fontsize=FONT_SIZE,
+                align=align
+            )
+
         if text_bottom:
-            ptext.draw(text_bottom, (PADDING, PADDING_TOP + (SCREEN_HEIGHT / 2)), color=(0,0,0), width=SCREEN_WIDTH-2*PADDING, fontname=FONT_FILE, lineheight=1, fontsize=FONT_SIZE, align="center")
+            ptext.draw(
+                text_bottom,
+                (padding_left,
+                padding_top + (SCREEN_HEIGHT / 2)),
+                color=(0,0,0),
+                width=SCREEN_WIDTH-2*padding_left,
+                fontname=font_fname,
+                lineheight=1,
+                fontsize=FONT_SIZE,
+                align=align
+            )
 
         # handle some events
         # This will work properly once non-blocking socket is done

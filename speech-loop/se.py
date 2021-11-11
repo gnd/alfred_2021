@@ -45,6 +45,8 @@ TRANSCRIPTION_PORT = 5000
 DEBUG_HOST = "127.0.0.1"
 DEBUG_PORT = 5432
 
+FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
+
 SPEECH_CODE_TO_LANG_CODE = {
     "cs-CZ": "cs",
     "en-US": "en",
@@ -279,7 +281,8 @@ class App:
 
         self.display = DisplaySender(
             TRANSCRIPTION_HOST,
-            TRANSCRIPTION_PORT
+            TRANSCRIPTION_PORT,
+            FONT_FILE
         )
         self.dm = DisplayManager(self, self.display)
         
