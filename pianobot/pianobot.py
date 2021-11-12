@@ -22,7 +22,7 @@ sol_08 = 21
 sol_09 = 23
 sol_10 = 29
 sol_11 = 31
-sol_12 = 33
+sol_12 = 36
 
 # set pins as output
 GPIO.setup(sol_01, GPIO.OUT, initial=GPIO.LOW)
