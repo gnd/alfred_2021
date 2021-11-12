@@ -28,7 +28,8 @@ from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
 from display_sender import DisplaySender
 from display_manager import DisplayManager
 
-TRANSCRIPTION_HOST = "127.0.0.1"
+# TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_HOST = "192.168.1.106"
 TRANSCRIPTION_PORT = 5000
 
 class TongueTwister:
