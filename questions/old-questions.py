@@ -17,7 +17,6 @@ from collections import namedtuple
 Seed = namedtuple("Seed", "title prompts")
 
 from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, cmagenta, ccyan, cyellow, cred
-from display_sender import DisplaySender
 
 IN_FILE_NAMES = "names.txt"
 SEEDS_DIR = "seeds"
@@ -48,28 +47,18 @@ STOCK_RESPONSES = [
 
 STOCK_RESP_PROB = 30
 
-TRANSCRIPTION_HOST = "192.168.1.106"
-# TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_HOST = "127.0.0.1"
 TRANSCRIPTION_PORT = 5000
 
-MIN_Q_PER_P = 1
-MAX_Q_PER_P = 3
-
-display = DisplaySender(
-    TRANSCRIPTION_HOST,
-    TRANSCRIPTION_PORT
-)
-
-def send_to_display(msg):
-    display.send(
-        text=msg,
-        fill=True,
-        align="center",
-        padding_left=40,
-        padding_top=40,
-    )
-
-
+def send_simple_msg(msg):
+    sock = socket.socket()
+    try:
+        sock.connect((TRANSCRIPTION_HOST, TRANSCRIPTION_PORT))
+        sock.send(msg.encode())
+    except:
+        pred(f"Cannot connect to {TRANSCRIPTION_HOST}:{TRANSCRIPTION_PORT}")
+    finally:
+        sock.close()
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
@@ -81,10 +70,9 @@ def normalize_text(text):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
 
-    text = re.sub(r"[0-9]+\.", "", text)
+    text = re.sub(r"[0-9]+\. ", "", text)
     text = re.sub(r"_+", "", text)
     text = re.sub("&quot;", "", text)
-    text = text.strip()
     return text
 
 def cut_to_sentence_end(text):
@@ -136,7 +124,6 @@ def text_to_speech(text):
     return
 
 def generate_question(prompt):
-    print("Generating question...")
     q = ""
     while len(q) < 1:
         gpt3_resp = openai.Completion.create(
@@ -150,55 +137,36 @@ def generate_question(prompt):
         )
 
         q = gpt3_resp["choices"][0]["text"]
-        pyellow(q)
         q = normalize_text(q)
         q = cut_to_sentence_end(q)
         q = q[0:get_question_mark_idx(q) + 1]
-        if len(q) == 0:
-            print("Empty question, regenerating...")
+        q = q
 
-    print("Question generated...")
     return q
 
 def translate_question(q):
-    print("Translating question...")
     # Translate generated text back to the language of speech
     out = translate_client.translate(q, target_language=OUTPUT_LANG)
     out = out["translatedText"]
     out = re.sub(r"[0-9]+\. ", "", out)
-    print("Translation done...")
     return out
 
 def question_me(prompt):
     q = generate_question(prompt)
-    orig = normalize_text(q)
-    q = translate_question(orig)
-    send_to_display(q.strip() + "\n\n" + orig.strip())
+    q = translate_question(q)
     pcyan(q)
     text_to_speech(q)
     
 def question_person(name, prompt):
     q = generate_question(prompt)
-    orig = normalize_text(q)
-    q = translate_question(orig)
+    q = translate_question(q)
     pcyan(name + ", " + q)
-    send_to_display(q.strip() + "\n\n" + orig.strip())
+    send_simple_msg(name.upper())
     q = name + ", <break time=\"500ms\"/>" + q
     text_to_speech(q)
 
-def gen_num_q():
-    return random.randint(MIN_Q_PER_P, MAX_Q_PER_P)
-
-def gen_q_pause():
-    p = random.gauss(30, 20)
-    while p <= 0:
-        p = random.gauss(30, 20)
-    pgreen(p)
-    # return 0
-    return p
-
-def question_specific_person(name, seeds):
-    send_to_display(name.upper())
+def question_specific_person(name, seed):
+    send_simple_msg(name.upper())
     text_to_speech(random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".")
 
     for x in range(SECONDS_FOR_ENTRANCE):
@@ -206,42 +174,28 @@ def question_specific_person(name, seeds):
         sys.stdout.flush()
         time.sleep(1)
 
-    num_question = gen_num_q()
-    print("Proceeding to ask ", num_question, "questions")
-
     # 1. question
-    seed = random.choice(seeds)
-    print("Seed " + cred(seed.title))
     prompt = get_prompt(seed)
-    
     pmagenta("Generating question...")
     question_me(prompt)
-
-    pmagenta("Giving time to answer...")
-    time.sleep(gen_q_pause())
+    cmd = input("> ")
     
     # next questions
-    for x in range(num_question - 1):
+    while cmd != "n" and cmd != "q":
         if random.randint(0, 100) < STOCK_RESP_PROB:
             text_to_speech(random.choice(STOCK_RESPONSES))
-
-        seed = random.choice(seeds)
-        print("Seed " + cred(seed.title))
         
         prompt = get_prompt(seed)
         pmagenta("Generating question...")
         question_me(prompt)
-        pmagenta("Giving time to answer...")
-        time.sleep(gen_q_pause())
+        cmd = input("> ")
 
     text_to_speech("<emphasis level=\"moderate\">Ok carbon.</emphasis>")
-    cmd = input("> ")
     return cmd
 
 def get_prompt(seed):
-    prompts = seed.prompts
-    idx = random.randint(0, len(prompts) - 1)
-    return prompts[idx]
+    idx = random.randint(0, len(seed) - 1)
+    return seed[idx]
 
 def print_people(people, current_idx):
     start = people[:current_idx]
@@ -303,6 +257,7 @@ def log_seeds(seeds):
 def main():
     # Load names
     NAMES = [l.strip() for l in open(IN_FILE_NAMES, "r").readlines()]
+
     SEEDS = load_seeds()
     
     # First part - series of questions for specific people
@@ -312,30 +267,31 @@ def main():
         if idx % len(NAMES) == 0:
             idx = 0
             random.shuffle(NAMES) # Shuffle names randomly
+        
         name = NAMES[idx]
+        
         print_people(NAMES, idx) # Prints order and currently questioned person.
+        
         idx = idx + 1
-        cmd = question_specific_person(name, SEEDS)
+        
+        seed = random.choice(SEEDS)
+        print("Seed " + cred(seed.title))
+        
+        cmd = question_specific_person(name, seed.prompts)
 
     pred("\n┏(-_-)┛┗(-_-﻿ )┓ OK CARBON ┗(-_-)┛┏(-_-)┓\n")
     os.system('play -nq -t alsa synth {} sine {}'.format(1, 440))
 
-    # Second part - questions at random for different people
-    while True:
+    # Second part - question at random for different people
+    cmd = ""
+    while cmd != "q":
         seed = random.choice(SEEDS)
         print("Seed " + cred(seed.title))
-        prompt = get_prompt(seed) # Random seed, random prompt
-        
+        prompt = get_prompt(seed.prompts) # Random seed, random prompt
         name = random.choice(NAMES)
         pyellow(f"Generating question for {name}.")
-        
         question_person(name, prompt)
-
-        # wait
-        sleep_time = random.randint(1, 15)
-        # sleep_time = random.randint(0, 1)
-        time.sleep(sleep_time)
-        print("Waiting for", sleep_time)
+        cmd = input(">") # Don't ask another question until requested
 
 
 if __name__ == "__main__":
