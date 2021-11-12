@@ -3,8 +3,8 @@ import socket
 from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
 
 class DisplaySender:
-    def __init__(self, host=DISPLAY_HOST, port=DISPLAY_PORT, font=None):
-        self.host = hots
+    def __init__(self, host, port, font=None):
+        self.host = host
         self.port = port
         self.font = font
 
