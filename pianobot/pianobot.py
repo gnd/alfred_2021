@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     # Periodically call osc4py3 processing method in your event loop.
     finished = False
-    cycle = True
+    cycle = False
     while not finished:
         osc_process()
         if cycle:
