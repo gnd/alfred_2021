@@ -41,6 +41,9 @@ TRANSCRIPTION_PORT = 5000
 DEBUG_HOST = "127.0.0.1"
 DEBUG_PORT = 5432
 
+DEFAULT_PADDING_TOP = 40
+DEFAULT_PADDING_LEFT = 40
+
 # FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
 FONT_FILE = "./fonts/Newsreader_36pt-Medium.ttf"
 MAX_WORDS = 24
@@ -66,7 +69,7 @@ class App:
             TRANSCRIPTION_PORT,
             FONT_FILE
         )
-        self.dm = DisplayManager(self, self.display, padding=(40, 40))
+        self.dm = DisplayManager(self, self.display, padding=(DEFAULT_PADDING_TOP, DEFAULT_PADDING_LEFT))
 
         self.last_sent_time = 0
         self.reset_pause = reset_pause
@@ -75,7 +78,7 @@ class App:
         self.translate_client = translate.Client()
 
         # GPT3 client
-        self.gpt3 = GPT3Client(self, self.translate_client, engine=DAVINCI_BETA_INSTRUCT)
+        self.gpt3 = GPT3Client(self, self.translate_client, engine=DAVINCI)
         self.gpt3_resp = ""
         
     def run(self):

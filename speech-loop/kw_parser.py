@@ -16,10 +16,10 @@ DIKY_RE = rf"\b(díky|Díky|jedeš|I'm out|peace out)\b"
 INSTRUCT_RE = rf"\b(model instruct|engine instruct|model instrukce|motor instrukce)\b"
 NORMAL_RE = rf"\b(model normal|engine normal|model normální|motor normální)\b"
 
-IN_CS_RE = rf"\b(input Czech|input check|input chess|input chair)\b"
+IN_CS_RE = rf"\b(input Czech|input check|input chess|input chair|input bohemian|bohemian in|Czech in)\b"
 IN_EN_RE = rf"\b(vstup anglicky)\b"
 
-OUT_CS_RE = rf"\b(output Czech|output check|output chess|output chair|výstup česky)\b"
+OUT_CS_RE = rf"\b(output Czech|output check|output chess|output chair|výstup česky|output bohemian|bohemian out)\b"
 OUT_EN_RE = rf"\b(output English|výstup anglicky)\b"
 
 ZOBRAZ_RE = rf"\b(zobraz|ukaž|show)\b"
