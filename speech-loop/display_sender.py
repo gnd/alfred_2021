@@ -2,13 +2,10 @@ import socket
 
 from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
 
-DISPLAY_HOST = "127.0.0.1"
-DISPLAY_PORT = 5000
-
 class DisplaySender:
     def __init__(self, host=DISPLAY_HOST, port=DISPLAY_PORT, font=None):
-        self.host = DISPLAY_HOST
-        self.port = DISPLAY_PORT
+        self.host = hots
+        self.port = port
         self.font = font
 
     def _send(self, msg):
