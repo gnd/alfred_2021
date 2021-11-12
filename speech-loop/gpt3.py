@@ -76,6 +76,7 @@ class GPT3Client:
         
             y = resp["choices"][0]["text"]
             y = normalize_text(y)
+            y = sanitize_translation(y)
 
             # Print response stats
             prainbow(
@@ -104,6 +105,7 @@ class GPT3Client:
 
         if self.output_speech_lang != "en-US":
             y = self.translate_response(y)
+            y = sanitize_translation(y)
 
         self.app.gpt3_resp = y
 
