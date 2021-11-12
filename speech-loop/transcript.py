@@ -153,8 +153,8 @@ class App:
                 self.push_to_buffer(text)
                 self.dm.display()
                 
-                # self.reset_buffer()
-                # self.reset_trans_buffer()
+                self.reset_buffer()
+                self.reset_trans_buffer()
             else:
                 self.push_to_buffer(text)
                 self.dm.display()
