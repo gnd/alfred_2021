@@ -39,9 +39,6 @@ TEXT_CS = "cs"
 TRANSCRIPTION_HOST = "192.168.1.106"
 TRANSCRIPTION_PORT = 5000
 
-DEBUG_HOST = "127.0.0.1"
-DEBUG_PORT = 5432
-
 DEFAULT_PADDING_TOP = 40
 DEFAULT_PADDING_LEFT = 40
 
@@ -52,7 +49,7 @@ MAX_WORDS = 24
 PAUSE_LENGTH = 10 # If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
 
 class App:
-    def __init__(self, speech_lang=SPEECH_CS, reset_pause=PAUSE_LENGTH):
+    def __init__(self, speech_lang=SPEECH_EN, reset_pause=PAUSE_LENGTH):
         self.text_buffer = ""
         self.prev_text_buffer = ""
         self.text_buffer_window = ""
@@ -307,4 +304,4 @@ class App:
 
 # Stavba / Generovanie / Karaoke
 if __name__ == "__main__":
-    App(speech_lang=SPEECH_CS).run()
+    App(speech_lang=SPEECH_EN).run()
