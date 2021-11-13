@@ -48,10 +48,11 @@ class DisplayManager:
             padding_left=self.padding_left,
         )
 
-    def display_action(self, msg):
+    def display_action(self, msg, fill_color=None):
         self.d.send(
             text=msg,
-            fill=True
+            fill=True,
+            fill_color=fill_color
         )
 
     def clear_top(self):

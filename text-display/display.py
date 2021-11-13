@@ -11,7 +11,7 @@ SCREEN_WIDTH = 1900
 SCREEN_HEIGHT = 1000
 # TODO - automaticaly detect wlan0 ip
 DISPLAY_HOST = "192.168.1.106"
-#DISPLAY_HOST = "127.0.0.1"
+# DISPLAY_HOST = "127.0.0.1"
 DISPLAY_PORT = 5000
 PADDING_LEFT = 50 
 PADDING_TOP = 100
@@ -61,14 +61,20 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
         align = msg_dict.get("align")
         padding_top = int(msg_dict.get("padding_top")) if msg_dict.get("padding_top") else PADDING_TOP
         padding_left = int(msg_dict.get("padding_left")) if msg_dict.get("padding_left") else PADDING_LEFT
+        fill_color = msg_dict.get("fill_color")
+
+        fc = (255,255,255)
+        if fill_color:
+            fc = [int(c) for c in fill_color.split("!")]
+            fc = (fc[0], fc[1], fc[2])
 
         # render text to screen - use ptext for easy text wrapping
         if fill:
-            screen.fill((255,255,255), (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+            screen.fill(fc, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
         if fill_top:
-            screen.fill((255,255,255), (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2))
+            screen.fill(fc, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2))
         if fill_bottom:
-            screen.fill((255,255,255), (0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT))
+            screen.fill(fc, (0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT))
 
         if text:
             ptext.draw(

@@ -138,7 +138,8 @@ def getLangCode(speech_code):
 
 def delete_word(text):
     """Deletes the last word from `text`."""
-    text = text.split()
+    if len(text) > 0:
+        text = text.split()
     if len(text) > 0:
         return " ".join(text[:-1])
     else:
