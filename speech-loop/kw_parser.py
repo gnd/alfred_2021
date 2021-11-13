@@ -13,14 +13,14 @@ POKRACUJ_RE = rf"\b(pokračuj|continue)\b"
 VYCISTIT_RE = rf"\b(sorry|exit|quit|vyčistit|clear)\b"
 DIKY_RE = rf"\b(díky|Díky|jedeš|I'm out|peace out)\b"
 
-INSTRUCT_RE = rf"\b(model instruct|engine instruct|model instrukce|motor instrukce)\b"
+INSTRUCT_RE = rf"\b(model instruct|engine instruct|model instrukce|motor instrukce|instruct)\b"
 NORMAL_RE = rf"\b(model normal|engine normal|model normální|motor normální)\b"
 
 IN_CS_RE = rf"\b(input Czech|input check|input chess|input chair|input bohemian|bohemian in|Czech in)\b"
 IN_EN_RE = rf"\b(vstup anglicky)\b"
 
-OUT_CS_RE = rf"\b(output Czech|output check|output chess|output chair|výstup česky|output bohemian|bohemian out)\b"
-OUT_EN_RE = rf"\b(output English|výstup anglicky)\b"
+OUT_CS_RE = rf"\b(output Czech|output check|output chess|output chair|výstup česky|output bohemian|bohemian out|Czech out|chair out|check out)\b"
+OUT_EN_RE = rf"\b(output English|výstup anglicky|English out)\b"
 
 ZOBRAZ_RE = rf"\b(zobraz|ukaž|show)\b"
 
