@@ -24,7 +24,8 @@ SEEDS_DIR = "seeds"
 
 SPEECH_LANG = "cs-CZ"
 TEXT_TARGET_LANG = "en"
-OUTPUT_SPEECH_LANG = "cs-CZ"
+# OUTPUT_SPEECH_LANG = "cs-CZ"
+OUTPUT_SPEECH_LANG = "en-GB"
 OUTPUT_LANG = "cs"
 
 ENGINE = "davinci-instruct-beta"
@@ -33,17 +34,31 @@ TEMPERATURE = 0.9
 
 SECONDS_FOR_ENTRANCE = 2
 
+# STOCK_RESPONSES = [
+#     "Zajímavé.", 
+#     "Ahá", 
+#     "Jasně.", 
+#     "Ani nepokračuj.", 
+#     "Velice zajímavé.", 
+#     "Mm, to jsem nečekela.", 
+#     "To jsem nečekela.",
+#     "Á, to zní moc hezky.",
+#     "To jsem ráda.",
+#     "To mi stačí. Děkuji.",
+# ]
+
 STOCK_RESPONSES = [
-    "Zajímavé.", 
-    "Ahá", 
-    "Jasně.", 
-    "Ani nepokračuj.", 
-    "Velice zajímavé.", 
-    "Mm, to jsem nečekela.", 
-    "To jsem nečekela.",
-    "Á, to zní moc hezky.",
-    "To jsem ráda.",
-    "To mi stačí. Děkuji.",
+    "Hmm",
+    "I suppose so.",
+    "Interesting.",
+    "Alright.",
+    "Please, don't go on.",
+    "Very interesting.",
+    "M, I didn't expect that.",
+    "Lovely.",
+    "O, that sounds lovely.",
+    "I'm glad for you.",
+    "Thank you. That's enough.",
 ]
 
 STOCK_RESP_PROB = 30
@@ -98,7 +113,7 @@ def cut_to_sentence_end(text):
 def pick_voice_randomly():
     return random.choice([texttospeech.SsmlVoiceGender.MALE, texttospeech.SsmlVoiceGender.FEMALE])
 
-def text_to_speech(text):
+def text_to_speech(text, lang=OUTPUT_SPEECH_LANG):
     # Set the text input to be synthesized
 
     # Add emphasis randomly
@@ -110,7 +125,7 @@ def text_to_speech(text):
     synthesis_input = texttospeech.SynthesisInput(ssml=text)
 
     voice = texttospeech.VoiceSelectionParams(
-        language_code=OUTPUT_SPEECH_LANG, ssml_gender=pick_voice_randomly()
+        language_code=lang, ssml_gender=pick_voice_randomly()
     )
 
     audio_config = texttospeech.AudioConfig(
@@ -170,36 +185,36 @@ def translate_question(q):
     return out
 
 def question_me(prompt):
-    q = generate_question(prompt)
-    orig = normalize_text(q)
-    q = translate_question(orig)
-    send_to_display(q.strip() + "\n\n" + orig.strip())
-    pcyan(q)
-    text_to_speech(q)
+    q_en = normalize_text(generate_question(prompt))
+    q_cs = translate_question(q_en)
+    send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
+    pcyan(q_en)
+    text_to_speech(q_en)
     
 def question_person(name, prompt):
-    q = generate_question(prompt)
-    orig = normalize_text(q)
-    q = translate_question(orig)
-    pcyan(name + ", " + q)
-    send_to_display(q.strip() + "\n\n" + orig.strip())
-    q = name + ", <break time=\"500ms\"/>" + q
-    text_to_speech(q)
+    q_en = normalize_text(generate_question(prompt))
+    if len(q_en) > 0:
+        q_en = q_en[0].lower() + q_en[1:]
+    q_en =name + ", " + q_en 
+    q_cs = translate_question(q_en)
+    pcyan(q_en)
+    send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
+    text_to_speech(q_en)
 
 def gen_num_q():
     return random.randint(MIN_Q_PER_P, MAX_Q_PER_P)
 
 def gen_q_pause():
-    p = random.gauss(30, 20)
+    p = random.gauss(30, 25)
     while p <= 0:
-        p = random.gauss(30, 20)
+        p = random.gauss(30, 25)
     pgreen(p)
     # return 0
     return p
 
 def question_specific_person(name, seeds):
     send_to_display(name.upper())
-    text_to_speech(random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".")
+    text_to_speech(random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".", "cs-CZ")
 
     for x in range(SECONDS_FOR_ENTRANCE):
         sys.stdout.write(cyellow(f"Asking question in {SECONDS_FOR_ENTRANCE - x}\r"))
@@ -234,7 +249,7 @@ def question_specific_person(name, seeds):
         pmagenta("Giving time to answer...")
         time.sleep(gen_q_pause())
 
-    text_to_speech("<emphasis level=\"moderate\">Ok carbon.</emphasis>")
+    text_to_speech("<emphasis level=\"moderate\">Ok carbon.</emphasis>", "cs-CZ")
     cmd = input("> ")
     return cmd
 
