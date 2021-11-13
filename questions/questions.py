@@ -300,33 +300,33 @@ def log_seeds(seeds):
                 outf.write("\n")
             outf.write("\n")
 
-def main():
-    # Load names
-    NAMES = [l.strip() for l in open(IN_FILE_NAMES, "r").readlines()]
-    SEEDS = load_seeds()
-    
-    # First part - series of questions for specific people
+def part_one(names, seeds):
     cmd = ""
     idx = 0
     while cmd != "q":
-        if idx % len(NAMES) == 0:
+        if idx % len(names) == 0:
             idx = 0
-            random.shuffle(NAMES) # Shuffle names randomly
-        name = NAMES[idx]
-        print_people(NAMES, idx) # Prints order and currently questioned person.
+            random.shuffle(names) # Shuffle names randomly
+        name = names[idx]
+        print_people(names, idx) # Prints order and currently questioned person.
         idx = idx + 1
-        cmd = question_specific_person(name, SEEDS)
+        cmd = question_specific_person(name, seeds)
 
-    pred("\n┏(-_-)┛┗(-_-﻿ )┓ OK CARBON ┗(-_-)┛┏(-_-)┓\n")
-    os.system('play -nq -t alsa synth {} sine {}'.format(1, 440))
-
-    # Second part - questions at random for different people
+def part_two(names, seeds):
+    idx = 0
     while True:
-        seed = random.choice(SEEDS)
+        if idx % len(names) == 0:
+            idx = 0
+            random.shuffle(names) # Shuffle names randomly
+        
+        name = names[idx]
+        print_people(names, idx) # Prints order and currently questioned person.
+        idx = idx + 1
+
+        seed = random.choice(seeds)
         print("Seed " + cred(seed.title))
         prompt = get_prompt(seed) # Random seed, random prompt
         
-        name = random.choice(NAMES)
         pyellow(f"Generating question for {name}.")
         
         question_person(name, prompt)
@@ -334,8 +334,23 @@ def main():
         # wait
         sleep_time = random.randint(1, 15)
         # sleep_time = random.randint(0, 1)
-        time.sleep(sleep_time)
         print("Waiting for", sleep_time)
+        time.sleep(sleep_time)
+
+def main(part=1):
+    # Load names
+    NAMES = [l.strip() for l in open(IN_FILE_NAMES, "r").readlines()]
+    SEEDS = load_seeds()
+    
+    if part == 1:
+        # First part - series of questions for specific people
+        part_one(NAMES, SEEDS)
+
+        pred("\n┏(-_-)┛┗(-_-﻿ )┓ OK CARBON ┗(-_-)┛┏(-_-)┓\n")
+        os.system('play -nq -t alsa synth {} sine {}'.format(1, 440))
+
+    # Second part - questions at random for different people
+    part_two(NAMES, SEEDS)
 
 
 if __name__ == "__main__":
