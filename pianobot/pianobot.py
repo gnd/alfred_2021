@@ -10,6 +10,12 @@ from osc4py3 import oscmethod as osm
 # set mode to BCM 
 GPIO.setmode(GPIO.BOARD)
 
+# device IP
+# on gnd's network
+#RPI_IP="192.168.40.252"
+# on Kafkarna's network
+RPI_IP="10.0.0.10"
+
 # define solenoid 01 - solenoid 12 pins
 sol_01 = 37
 sol_02 = 35
@@ -89,7 +95,7 @@ def noteoff(pin):
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", default="192.168.0.192", help="The ip to listen on")
+    parser.add_argument("--ip", default=RPI_IP, help="The ip to listen on")
     parser.add_argument("--port", type=int, default=6666, help="The port to listen on")
     args = parser.parse_args()
   
@@ -119,7 +125,7 @@ if __name__ == "__main__":
 
     # Periodically call osc4py3 processing method in your event loop.
     finished = False
-    cycle = True
+    cycle = False
     while not finished:
         osc_process()
         if cycle:
