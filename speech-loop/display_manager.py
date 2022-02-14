@@ -54,6 +54,16 @@ class DisplayManager:
             fill=True,
             fill_color=fill_color
         )
+    
+    def display_state(self, input_lang, output_lang, model):
+        print("SENDING STATE")
+        self.d.send(
+            fill=False,
+            fill_bottom=False,
+            input_lang=input_lang,
+            output_lang=output_lang,
+            model=model
+        )
 
     def clear_top(self):
         self.d.send(text=None, fill=False, fill_top=True)

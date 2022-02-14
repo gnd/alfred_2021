@@ -10,13 +10,14 @@ from msg_decoder import decode_msg
 SCREEN_WIDTH = 1900
 SCREEN_HEIGHT = 1000
 # TODO - automaticaly detect wlan0 ip
-DISPLAY_HOST = "192.168.1.106"
+DISPLAY_HOST = "192.168.217.207"
 # DISPLAY_HOST = "127.0.0.1"
 DISPLAY_PORT = 5000
 PADDING_LEFT = 50 
 PADDING_TOP = 100
 ONCE = True
 FONT_SIZE = 72
+STATE_FONT_SIZE = 36
 
 FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
 
@@ -62,6 +63,9 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
         padding_top = int(msg_dict.get("padding_top")) if msg_dict.get("padding_top") else PADDING_TOP
         padding_left = int(msg_dict.get("padding_left")) if msg_dict.get("padding_left") else PADDING_LEFT
         fill_color = msg_dict.get("fill_color")
+        input_lang = msg_dict.get("input_lang")
+        output_lang = msg_dict.get("output_lang")
+        model = msg_dict.get("model")
 
         fc = (255,255,255)
         if fill_color:
@@ -98,6 +102,18 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
                 fontname=font_fname,
                 lineheight=1,
                 fontsize=FONT_SIZE,
+                align=align
+            )
+            
+        if input_lang:
+            ptext.draw(
+                "In: {} Out: {} Model: {}".format(input_lang.strip(), output_lang.strip(), model.strip()),
+                (10, SCREEN_HEIGHT - 40),
+                color=(0,0,0),
+                width=SCREEN_WIDTH,
+                fontname=font_fname,
+                lineheight=1,
+                fontsize=STATE_FONT_SIZE,
                 align=align
             )
 

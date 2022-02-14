@@ -36,7 +36,9 @@ TEXT_EN = "en"
 TEXT_CS = "cs"
 
 # TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_HOST = "192.168.1.106"
+TRANSCRIPTION_HOST = "192.168.217.207"
+# GND HOME
+TRANSCRIPTION_HOST = "192.168.217.207"
 TRANSCRIPTION_PORT = 5000
 
 DEFAULT_PADDING_TOP = 40
@@ -71,6 +73,10 @@ class App:
 
         self.last_sent_time = 0
         self.reset_pause = reset_pause
+        
+        self.input_lang = "en"
+        self.output_lang = "en"
+        self.model = "normal"
 
         # Translation client
         self.translate_client = translate.Client()
@@ -83,6 +89,9 @@ class App:
         while True:
             if self.text_buffer == "":
                 pcyan("Listening :)\n")
+                
+            # Always show state
+            self.dm.display_state(self.input_lang, self.output_lang, self.model)
 
             # Blocks to process audio from the mic. This function continues
             # once the end of the utterance has been recognized.        
@@ -96,6 +105,7 @@ class App:
 
             # Set Instruct
             if kw_dict.get("instruct"):
+                self.model = "instruct"
                 self.gpt3.set_engine(DAVINCI_BETA_INSTRUCT)
                 pred("Setting instruct")
                 self.dm.display_action("engine: Instruct")
@@ -104,6 +114,7 @@ class App:
 
             # Set Normal
             if kw_dict.get("normal"):
+                self.model = "normal"
                 self.gpt3.set_engine(DAVINCI)
                 pred("Setting normal")
                 self.dm.display_action("engine: Normal")
@@ -111,26 +122,33 @@ class App:
                 text = re.sub(NORMAL_RE, "", text).strip()
 
             if kw_dict.get("in_english"):
+                self.input_lang = "en"
                 self.speech_lang = SPEECH_EN
                 pred("Setting input English")
                 self.dm.display_action("input: English")
                 time.sleep(1)
                 self.dm.clear()
+                # Always show state
+                self.dm.display_state(self.input_lang, self.output_lang, self.model)
                 self.reset_buffer()
                 self.reset_trans_buffer()
                 continue
 
             if kw_dict.get("in_czech"):
+                self.input_lang = "cs"
                 self.speech_lang = SPEECH_CS
                 pred("Setting input Czech")
                 self.dm.display_action("input: Czech")
                 time.sleep(1)
                 self.dm.clear()
+                # Always show state
+                self.dm.display_state(self.input_lang, self.output_lang, self.model)
                 self.reset_buffer()
                 self.reset_trans_buffer()
                 continue
 
             if kw_dict.get("out_english"):
+                self.output_lang = "en"
                 self.gpt3.output_speech_lang = SPEECH_EN
                 pred("Setting output English")
                 self.dm.display_action("output: English")
@@ -138,6 +156,7 @@ class App:
                 continue
 
             if kw_dict.get("out_czech"):
+                self.output_lang = "cs"
                 self.gpt3.output_speech_lang = SPEECH_CS
                 pred("Setting output Czech")
                 self.dm.display_action("output: Czech")
@@ -153,6 +172,8 @@ class App:
             # Stop word clears the text
             if kw_dict.get("clear"):
                 self.dm.clear()
+                # Always show state
+                self.dm.display_state(self.input_lang, self.output_lang, self.model)
                 self.reset_buffer()
                 self.reset_trans_buffer()
                 continue
@@ -198,6 +219,8 @@ class App:
                 self.push_to_buffer(text)
                 self.dm.display()
                 self.dm.clear()
+                # Always show state
+                self.dm.display_state(self.input_lang, self.output_lang, self.model)
 
                 # Generate GPT-3 response.
                 self.gpt3.feed(self.text_buffer)
@@ -210,6 +233,7 @@ class App:
                 self.dm.display()
                 # translate new text and display buffered translation
                 self.display_translation_async()
+            
 
     def handle_stt_response(self, responses):
         num_chars_printed = 0
@@ -237,6 +261,8 @@ class App:
             if not result.is_final:
                 sys.stdout.write(transcript + overwrite_chars + "\r")    
                 self.dm.display_intermediate(transcript)
+                # Always show state
+                self.dm.display_state(self.input_lang, self.output_lang, self.model)
 
                 sys.stdout.flush()
                 num_chars_printed = len(transcript)
@@ -246,6 +272,8 @@ class App:
                         return ((transcript + overwrite_chars + "\n"), kw_dict)
             else:
                 self.dm.display_intermediate(transcript)
+                # Always show state
+                self.dm.display_state(self.input_lang, self.output_lang, self.model)
                 return ((transcript + overwrite_chars + "\n"), kw_dict)
                 
 
@@ -283,13 +311,15 @@ class App:
 
         self.trans_buffer = translation
         self.dm.display_translation()
+        # Always show state
+        self.dm.display_state(self.input_lang, self.output_lang, self.model)
 
     def display_translation_async(self):
         t = threading.Thread(target=self.translate)
         t.start()
 
     def chop_endword(self, text):
-        print("CHop endword text:", text)
+        print("Chop endword text:", text)
         kw_end = ["I'm out", "peace out"] if self.speech_lang != "cs-CZ" else ["díky", "jedeš"]
     
         if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
