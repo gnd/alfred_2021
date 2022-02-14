@@ -28,7 +28,10 @@ class DisplaySender:
         align=None,
         padding_left=None,
         padding_top=None,
-        font=None):
+        font=None,
+        input_lang=None,
+        output_lang=None,
+        model=None):
         key_vals = []
         # Serialize all parameters
         if text:
@@ -52,6 +55,12 @@ class DisplaySender:
         if font or self.font:
             f = font if font else self.font
             key_vals.append(_get_key_val("font", f))
+        if input_lang or self.input_lang:
+            key_vals.append(_get_key_val("input_lang", input_lang))
+        if output_lang or self.output_lang:
+            key_vals.append(_get_key_val("output_lang", output_lang))
+        if model or self.model:
+            key_vals.append(_get_key_val("model", model))
         
         msg = _join_key_vals(key_vals)
         

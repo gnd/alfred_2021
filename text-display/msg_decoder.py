@@ -2,8 +2,6 @@ FIELD_SEPARATOR = ":"
 KEY_VAL_SEPARATOR = "="
 
 # class Message:
-    
-
 def encode_msg(text):
     text = text.replace(FIELD_SEPARATOR, "") # ensure `:` is not found to adhere to protocol
     pass
