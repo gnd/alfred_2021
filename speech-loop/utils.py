@@ -9,6 +9,12 @@ CHARS_PER_TOK = 4
 CZK_PER_USD = 21.93
 USD_PER_1000_TOKS = 0.06 # for Davinci
 
+def get_env(key, fallback):
+    if key in os.environ:
+        return os.environ[key]
+    else:
+        return fallback
+
 # Logging functions
 
 pblue = lambda text: cprint(text, "blue")

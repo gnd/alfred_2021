@@ -22,17 +22,20 @@ from google.cloud import texttospeech
 from google.cloud import translate_v2 as translate
 
 import utils
+from utils import get_env
 from stt_loop import processMicrophoneStream
 from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
 
 from display_sender import DisplaySender
 from display_manager import DisplayManager
 
-# TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_HOST = "192.168.217.207"
 # GND HOME
-TRANSCRIPTION_HOST = "192.168.217.207"
-TRANSCRIPTION_PORT = 5000
+# TRANSCRIPTION_HOST = "192.168.217.207"
+
+TRANSCRIPTION_HOST = get_env("OKC_DISPLAY_HOST", "127.0.0.1")
+TRANSCRIPTION_PORT = get_env("OKC_DISPLAY_PORT", 5000)
+SPEECH_LANG = get_env("OKC_LANG_PREPIS", "en-US")
+SCENE_END_WORD = get_env("OKC_SCENE_END_WORD_PREPIS", "Showtime")
 
 class TongueTwister:
     def __init__(self, speech_lang="en-US", exit_word="Showtime"):
@@ -110,5 +113,5 @@ class TongueTwister:
 
 
 if __name__ == "__main__":
-    app = TongueTwister(speech_lang="en-US")
+    app = TongueTwister(speech_lang=SPEECH_LANG, exit_word=SCENE_END_WORD)
     app.run()
