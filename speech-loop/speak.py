@@ -17,7 +17,7 @@ from stt_loop import processMicrophoneStream
 OUTPUT_SPEECH_LANG = "en-GB"
 
 # TRANSCRIPTION_HOST = "localhost"
-TRANSCRIPTION_HOST = "192.168.220.207"
+TRANSCRIPTION_HOST = "127.0.0.1"
 TRANSCRIPTION_PORT = 5000
 
 client = texttospeech.TextToSpeechClient()
