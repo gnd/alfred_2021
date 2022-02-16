@@ -15,8 +15,7 @@ from google.cloud import speech
 from google.cloud import translate_v2 as translate
 
 from stt_loop import processMicrophoneStream
-from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word
-from utils import delete_word
+from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word, delete_word, get_env
 
 from display_sender import DisplaySender
 from display_manager import DisplayManager
@@ -35,11 +34,15 @@ SPEECH_CS = "cs-CZ"
 TEXT_EN = "en"
 TEXT_CS = "cs"
 
-# TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_HOST = "192.168.217.207"
+SPEECH_LANG = get_env("OKC_SPEECH_LANG", SPEECH_EN)
+OUTPUT_SPEECH_LANG = get_env("OKC_OUTPUT_SPEECH_LANG", SPEECH_CS)
+ENGINE = get_env("OKC_ENGINE", DAVINCI)
+
 # GND HOME
-TRANSCRIPTION_HOST = "192.168.217.207"
-TRANSCRIPTION_PORT = 5000
+# TRANSCRIPTION_HOST = "192.168.217.207"
+
+TRANSCRIPTION_HOST = get_env("OKC_DISPLAY_HOST", "127.0.0.1")
+TRANSCRIPTION_PORT = get_env("OKC_DISPLAY_PORT", 5000)
 
 DEFAULT_PADDING_TOP = 40
 DEFAULT_PADDING_LEFT = 40
@@ -51,7 +54,7 @@ MAX_WORDS = 24
 PAUSE_LENGTH = 10 # If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
 
 class App:
-    def __init__(self, speech_lang=SPEECH_EN, reset_pause=PAUSE_LENGTH):
+    def __init__(self, speech_lang=SPEECH_LANG, reset_pause=PAUSE_LENGTH):
         self.text_buffer = ""
         self.prev_text_buffer = ""
         self.text_buffer_window = ""
@@ -73,16 +76,16 @@ class App:
 
         self.last_sent_time = 0
         self.reset_pause = reset_pause
-        
-        self.input_lang = "en"
-        self.output_lang = "en"
+
+        self.input_lang = "cs" if SPEECH_LANG == "cs-CZ" else "en"
+        self.output_lang = "cs" if OUTPUT_SPEECH_LANG == "cs-CZ" else "en"
         self.model = "normal"
 
         # Translation client
         self.translate_client = translate.Client()
 
         # GPT3 client
-        self.gpt3 = GPT3Client(self, self.translate_client, engine=DAVINCI)
+        self.gpt3 = GPT3Client(self, self.translate_client, engine=ENGINE, input_lang=self.input_lang, output_speech_lang=OUTPUT_SPEECH_LANG)
         self.gpt3_resp = ""
         
     def run(self):
@@ -334,4 +337,4 @@ class App:
 
 # Stavba / Generovanie / Karaoke
 if __name__ == "__main__":
-    App(speech_lang=SPEECH_EN).run()
+    App().run()
