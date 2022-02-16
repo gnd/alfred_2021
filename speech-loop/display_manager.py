@@ -2,13 +2,14 @@ import time
 from utils import concat
 
 class DisplayManager:
-    def __init__(self, app, display, top_bottom_split=True, align="center", padding=None):
+    def __init__(self, app, display, top_bottom_split=True, align="center", padding=None, display_translation_as_main=False):
         self.app = app
         self.d = display
         self.top_bottom_split = top_bottom_split
         self.align = align
         self.padding_top = padding[0]
         self.padding_left = padding[1]
+        self.display_translation_as_main = display_translation_as_main
 
     def display(self):
         msg = self.app.text_buffer_window if self.app.text_buffer_window is not None else self.app.text_buffer
@@ -39,6 +40,17 @@ class DisplayManager:
 
     def display_translation(self):
         msg = self.app.trans_buffer_window if self.app.trans_buffer_window is not None else self.app.trans_buffer
+
+        if self.display_translation_as_main:
+            self.d.send(
+                msg,
+                fill=True,
+                align=self.align,
+                padding_top=self.padding_top,
+                padding_left=self.padding_left,
+            )
+            return
+
         self.d.send(
             text_bottom=msg,
             fill=False,

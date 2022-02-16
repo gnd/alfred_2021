@@ -53,7 +53,7 @@ class GPT3Client:
         self.log(x)
 
         # Translate hypothesis from Czech to English.
-        if self.input_lang != "en-US":
+        if self.input_lang != "en":
             x = self.translate(x, "en")
 
         pyellow(x + "\n")

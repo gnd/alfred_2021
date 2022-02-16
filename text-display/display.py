@@ -1,18 +1,28 @@
+import os
 import fire
 import ptext
 import pygame
 import socket
 from msg_decoder import decode_msg 
 
+def get_env(key, fallback):
+    if key in os.environ:
+        return os.environ[key]
+    else:
+        return fallback
+
 # set some globals
 # SCREEN_WIDTH = 3000
 # SCREEN_HEIGHT = 2000
-SCREEN_WIDTH = 1900
-SCREEN_HEIGHT = 1000
+
+SCREEN_WIDTH = int(get_env("OKC_SCREEN_W", 1900))
+SCREEN_HEIGHT = int(get_env("OKC_SCREEN_H", 1000))
+WINDOW_TITLE = get_env("OKC_WINDOW_TITLE", "OK CARBON")
+
 # TODO - automaticaly detect wlan0 ip
-DISPLAY_HOST = "192.168.217.207"
-# DISPLAY_HOST = "127.0.0.1"
-DISPLAY_PORT = 5000
+DISPLAY_HOST = get_env("OKC_DISPLAY_HOST", "127.0.0.1")
+DISPLAY_PORT = int(get_env("OKC_DISPLAY_PORT", 5000))
+
 PADDING_LEFT = 50 
 PADDING_TOP = 100
 ONCE = True
@@ -34,6 +44,8 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     # font = pygame.font.Font(pygame.font.get_default_font(), 36)
     font = pygame.font.Font(FONT_FILE, 36)
+
+    pygame.display.set_caption(WINDOW_TITLE)
 
     running =  True
     while running:
@@ -105,6 +117,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
                 align=align
             )
             
+        # Status bar
         if input_lang:
             ptext.draw(
                 "In: {} Out: {} Model: {}".format(input_lang.strip(), output_lang.strip(), model.strip()),
