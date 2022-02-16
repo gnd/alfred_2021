@@ -38,6 +38,8 @@ SPEECH_LANG = get_env("OKC_SPEECH_LANG", SPEECH_EN)
 OUTPUT_SPEECH_LANG = get_env("OKC_OUTPUT_SPEECH_LANG", SPEECH_CS)
 ENGINE = get_env("OKC_ENGINE", DAVINCI)
 
+TRANSLATE = bool(get_env("OKC_TRANSLATE_FROM_MAIN", ""))
+
 # GND HOME
 # TRANSCRIPTION_HOST = "192.168.217.207"
 
@@ -77,9 +79,9 @@ class App:
         self.last_sent_time = 0
         self.reset_pause = reset_pause
 
-        self.input_lang = "cs" if SPEECH_LANG == "cs-CZ" else "en"
-        self.output_lang = "cs" if OUTPUT_SPEECH_LANG == "cs-CZ" else "en"
-        self.model = "normal"
+        self.input_lang = "cs" if SPEECH_LANG == SPEECH_CS else "en"
+        self.output_lang = "cs" if OUTPUT_SPEECH_LANG == SPEECH_CS else "en"
+        self.model = "normal" if ENGINE == DAVINCI else "instruct"
 
         # Translation client
         self.translate_client = translate.Client()
@@ -301,6 +303,9 @@ class App:
         self.trans_buffer_window = ""
 
     def translate(self):
+        if not TRANSLATE:
+            return
+
         pyellow(f"Translating text: {self.text_buffer_window}")
         translation = self.translate_client.translate(
             self.text_buffer_window,
