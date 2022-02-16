@@ -11,15 +11,19 @@ from osc4py3 import oscmethod as osm
 GPIO.setmode(GPIO.BOARD)
 
 # device IP
+# on home net
+#RPI_IP="192.168.0.192"
 # on gnd's network
-#RPI_IP="192.168.40.252"
+#RPI_IP="192.168.217.168"
 # on Kafkarna's network
-RPI_IP="10.0.0.10"
+#RPI_IP="10.0.0.10"
+# on AVD network
+RPI_IP="192.168.1.111"
 
 # define solenoid 01 - solenoid 12 pins
 sol_01 = 37
 sol_02 = 35
-sol_03 = 33
+sol_03 = 36
 sol_04 = 31
 sol_05 = 29
 sol_06 = 23
@@ -144,3 +148,6 @@ if __name__ == "__main__":
         
     # Properly close the system
     osc_terminate()
+
+    # gpio cleanup
+    GPIO.cleanup()
