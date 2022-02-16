@@ -110,7 +110,8 @@ class App:
             if kw_dict.get("instruct"):
                 self.model = "instruct"
                 pred("Setting instruct")
-                self.dm.display_action("engine: Instruct")
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.display_action("engine: Instruct")
                 time.sleep(1)
                 text = re.sub(INSTRUCT_RE, "", text).strip()
 
@@ -118,7 +119,8 @@ class App:
             if kw_dict.get("normal"):
                 self.model = "normal"
                 pred("Setting normal")
-                self.dm.display_action("engine: Normal")
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.display_action("engine: Normal")
                 time.sleep(1)
                 text = re.sub(NORMAL_RE, "", text).strip()
 
@@ -126,9 +128,11 @@ class App:
                 self.input_lang = "en"
                 self.speech_lang = SPEECH_EN
                 pred("Setting input English")
-                self.dm.display_action("input: English")
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.display_action("input: English")
                 time.sleep(1)
-                self.dm.clear()
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.clear()
                 self.dm.display_state(self.input_lang, self.output_lang, self.model)
                 self.reset_buffer()
                 self.reset_trans_buffer()
@@ -138,9 +142,11 @@ class App:
                 self.input_lang = "cs"
                 self.speech_lang = SPEECH_CS
                 pred("Setting input Czech")
-                self.dm.display_action("input: Czech")
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.display_action("input: Czech")
                 time.sleep(1)
-                self.dm.clear()
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.clear()
                 self.dm.display_state(self.input_lang, self.output_lang, self.model)
                 self.reset_buffer()
                 self.reset_trans_buffer()
@@ -149,23 +155,28 @@ class App:
             if kw_dict.get("out_english"):
                 self.output_lang = "en"
                 pred("Setting output English")
-                self.dm.display_action("output: English")
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.display_action("output: English")
                 time.sleep(1)
                 continue
 
             if kw_dict.get("out_czech"):
                 self.output_lang = "cs"
                 pred("Setting output Czech")
-                self.dm.display_action("output: Czech")
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.display_action("output: Czech")
                 time.sleep(1)
                 continue
 
             # Stop word clears the text
             if kw_dict.get("clear"):
-                self.dm.clear()
-                self.dm.display_state(self.input_lang, self.output_lang, self.model)
                 self.reset_buffer()
                 self.reset_trans_buffer()
+                if TRANSLATION_FULLSCREEN:
+                    self.dm.clear()
+                else:
+                    self.dm.display_translation()
+                self.dm.display_state(self.input_lang, self.output_lang, self.model)
                 continue
             
             if kw_dict.get("delete"):

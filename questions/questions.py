@@ -63,10 +63,10 @@ STOCK_RESPONSES = [
 
 STOCK_RESP_PROB = 30
 
-TRANSCRIPTION_HOST = "192.168.1.106"
-# TRANSCRIPTION_HOST = "127.0.0.1"
 # GND HOME
-TRANSCRIPTION_HOST = "192.168.0.38"
+# TRANSCRIPTION_HOST = "192.168.0.38"
+
+TRANSCRIPTION_HOST = "127.0.0.1"
 TRANSCRIPTION_PORT = 5000
 
 MIN_Q_PER_P = 1
@@ -85,8 +85,6 @@ def send_to_display(msg):
         padding_left=40,
         padding_top=40,
     )
-
-
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()

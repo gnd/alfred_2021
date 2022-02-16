@@ -3,10 +3,12 @@ import socket
 from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow
 
 class DisplaySender:
-    def __init__(self, host, port, font=None):
+    def __init__(self, host, port, font=None, fill_color=None, font_color=None):
         self.host = host
         self.port = port
         self.font = font
+        self.fill_color = fill_color
+        self.font_color = font_color
 
     def _send(self, msg):
         sock = socket.socket()
@@ -25,13 +27,15 @@ class DisplaySender:
         fill=True,
         fill_top=None,
         fill_bottom=None,
+        fill_color=None,
         align=None,
         padding_left=None,
         padding_top=None,
         font=None,
         input_lang=None,
         output_lang=None,
-        model=None):
+        model=None,
+        font_color=None):
         key_vals = []
         # Serialize all parameters
         if text:
@@ -52,15 +56,21 @@ class DisplaySender:
             key_vals.append(_get_key_val("padding_top", padding_top))
         if padding_left:
             key_vals.append(_get_key_val("padding_left", padding_left))
+        if input_lang:
+            key_vals.append(_get_key_val("input_lang", input_lang))
+        if output_lang:
+            key_vals.append(_get_key_val("output_lang", output_lang))
+        if model:
+            key_vals.append(_get_key_val("model", model))
         if font or self.font:
             f = font if font else self.font
             key_vals.append(_get_key_val("font", f))
-        if input_lang or self.input_lang:
-            key_vals.append(_get_key_val("input_lang", input_lang))
-        if output_lang or self.output_lang:
-            key_vals.append(_get_key_val("output_lang", output_lang))
-        if model or self.model:
-            key_vals.append(_get_key_val("model", model))
+        if fill_color or self.fill_color:
+            fc = fill_color if fill_color else self.fill_color
+            key_vals.append(_get_key_val("fill_color", fc))
+        if font_color or self.font_color:
+            fc = font_color if font_color else self.font_color
+            key_vals.append(_get_key_val("font_color", fc))
         
         msg = _join_key_vals(key_vals)
         
