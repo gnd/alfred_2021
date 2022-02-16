@@ -99,6 +99,8 @@ def normalize_text(text):
     text = re.sub(r"[0-9]+\.", "", text)
     text = re.sub(r"_+", "", text)
     text = re.sub("&quot;", "", text)
+    text = re.sub(r"[“”\"‘’]", "", text)
+    text = re.sub(r"[\n ]+", " ", text)
     text = text.strip()
     return text
 
@@ -272,8 +274,8 @@ def print_people(people, current_idx):
     line = line + ccyan("]")
     print(line)
 
-def load_seeds():
-    seed_files = os.listdir("seeds")
+def load_seeds(seeds_dir):
+    seed_files = os.listdir(seeds_dir)
 
     seed_titles = [f.replace(".txt", "").upper() for f in seed_files] # e.g. ["EGO", "CULTURE", "HUMAN", ...]
     
@@ -281,7 +283,7 @@ def load_seeds():
     for idx, fname in enumerate(seed_files):
         # Split to prompts
         prompts = []
-        for raw_prompt in open("seeds/" + fname, "r").read().split("\n\n"):
+        for raw_prompt in open(os.path.join(seeds_dir, fname), "r").read().split("\n\n"):
             lines = raw_prompt.split("\n")
             prompt = ""
             jdx = 0
@@ -352,17 +354,16 @@ def part_two(names, seeds):
         print("Waiting for", sleep_time)
         time.sleep(sleep_time)
 
-def main(part=1):
+def main(seeds_dir=SEEDS_DIR):
     # Load names
     NAMES = [l.strip() for l in open(IN_FILE_NAMES, "r").readlines()]
-    SEEDS = load_seeds()
+    SEEDS = load_seeds(seeds_dir)
     
-    if part == 1:
-        # First part - series of questions for specific people
-        part_one(NAMES, SEEDS)
+    # First part - series of questions for specific people
+    part_one(NAMES, SEEDS)
 
-        pred("\n┏(-_-)┛┗(-_-﻿ )┓ OK CARBON ┗(-_-)┛┏(-_-)┓\n")
-        os.system('play -nq -t alsa synth {} sine {}'.format(1, 440))
+    pred("\n┏(-_-)┛┗(-_-﻿ )┓ OK CARBON ┗(-_-)┛┏(-_-)┓\n")
+    os.system('play -nq -t alsa synth {} sine {}'.format(1, 440))
 
     # Second part - questions at random for different people
     part_two(NAMES, SEEDS)
