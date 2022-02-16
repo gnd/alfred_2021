@@ -3,11 +3,12 @@ import socket
 from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow
 
 class DisplaySender:
-    def __init__(self, host, port, font=None, fill_color=None):
+    def __init__(self, host, port, font=None, fill_color=None, font_color=None):
         self.host = host
         self.port = port
         self.font = font
         self.fill_color = fill_color
+        self.font_color = font_color
 
     def _send(self, msg):
         sock = socket.socket()
@@ -33,7 +34,8 @@ class DisplaySender:
         font=None,
         input_lang=None,
         output_lang=None,
-        model=None):
+        model=None,
+        font_color=None):
         key_vals = []
         # Serialize all parameters
         if text:
@@ -66,6 +68,9 @@ class DisplaySender:
         if fill_color or self.fill_color:
             fc = fill_color if fill_color else self.fill_color
             key_vals.append(_get_key_val("fill_color", fc))
+        if font_color or self.font_color:
+            fc = font_color if font_color else self.font_color
+            key_vals.append(_get_key_val("font_color", fc))
         
         msg = _join_key_vals(key_vals)
         

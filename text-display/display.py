@@ -75,6 +75,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
         padding_top = int(msg_dict.get("padding_top")) if msg_dict.get("padding_top") else PADDING_TOP
         padding_left = int(msg_dict.get("padding_left")) if msg_dict.get("padding_left") else PADDING_LEFT
         fill_color = msg_dict.get("fill_color")
+        font_color = msg_dict.get("font_color")
         input_lang = msg_dict.get("input_lang")
         output_lang = msg_dict.get("output_lang")
         model = msg_dict.get("model")
@@ -83,6 +84,11 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
         if fill_color:
             fc = [int(c) for c in fill_color.split("!")]
             fc = (fc[0], fc[1], fc[2])
+
+        font_c = (0,0,0)
+        if font_color:
+            font_c = [int(c) for c in font_color.split("!")]
+            font_c = (font_c[0], font_c[1], font_c[2])
 
         # render text to screen - use ptext for easy text wrapping
         if fill:
@@ -96,7 +102,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
             ptext.draw(
                 text,
                 (padding_left, padding_top),
-                color=(0,0,0),
+                color=font_c,
                 width=SCREEN_WIDTH-2*padding_left,
                 fontname=font_fname,
                 lineheight=1,
@@ -109,7 +115,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
                 text_bottom,
                 (padding_left,
                 padding_top + (SCREEN_HEIGHT / 2)),
-                color=(0,0,0),
+                color=font_c,
                 width=SCREEN_WIDTH-2*padding_left,
                 fontname=font_fname,
                 lineheight=1,
@@ -122,7 +128,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
             ptext.draw(
                 "In: {} Out: {} Model: {}".format(input_lang.strip(), output_lang.strip(), model.strip()),
                 (10, SCREEN_HEIGHT - 40),
-                color=(0,0,0),
+                color=font_c,
                 width=SCREEN_WIDTH,
                 fontname=font_fname,
                 lineheight=1,
