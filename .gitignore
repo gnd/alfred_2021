@@ -7,3 +7,6 @@ alfred_2021*.json
 telefon/*.txt
 questions/seeds-log.txt
 speech-loop/1310-instruct.py
+scene2-1.sh
+scene2-2.sh
+scene2-3.sh

@@ -136,7 +136,8 @@ class GPT3Client:
         synthesis_input = texttospeech.SynthesisInput(text=text)
         voice = texttospeech.VoiceSelectionParams(language_code=self.output_speech_lang)
         audio_config = texttospeech.AudioConfig(
-            speaking_rate=0.9, # 0.75, # 0.5 - 4.0
+            # SPEED speed
+            speaking_rate=0.75, # 0.75, # 0.5 - 4.0
             effects_profile_id=['medium-bluetooth-speaker-class-device'],
             audio_encoding=texttospeech.AudioEncoding.MP3,
             pitch=0, # 20 for dying patient voice
