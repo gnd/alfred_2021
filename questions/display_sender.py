@@ -55,11 +55,11 @@ class DisplaySender:
         if font or self.font:
             f = font if font else self.font
             key_vals.append(_get_key_val("font", f))
-        if input_lang or self.input_lang:
+        if input_lang:
             key_vals.append(_get_key_val("input_lang", input_lang))
-        if output_lang or self.output_lang:
+        if output_lang:
             key_vals.append(_get_key_val("output_lang", output_lang))
-        if model or self.model:
+        if model:
             key_vals.append(_get_key_val("model", model))
         
         msg = _join_key_vals(key_vals)
