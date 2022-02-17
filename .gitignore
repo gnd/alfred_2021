@@ -5,5 +5,6 @@ alfred_2021*.json
 *.mp3
 *.sh
 telefon/*.txt
+*.txt
 questions/seeds-log.txt
 speech-loop/1310-instruct.py
