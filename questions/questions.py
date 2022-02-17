@@ -86,6 +86,8 @@ TRANSCRIPTION_PORT = 5000
 MIN_Q_PER_P = 1
 MAX_Q_PER_P = 3
 
+RLY_BIG_FONT_SIZE = 333
+
 display = DisplaySender(
     TRANSCRIPTION_HOST,
     TRANSCRIPTION_PORT
@@ -100,7 +102,15 @@ def send_to_display(msg):
         padding_top=40,
     )
 
-
+def send_to_display_rly_big(msg):
+    display.send(
+        text=msg,
+        fill=True,
+        align="center",
+        padding_left=40,
+        padding_top=40,
+        font_size=RLY_BIG_FONT_SIZE,
+    )
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
@@ -115,6 +125,8 @@ def normalize_text(text):
     text = re.sub(r"[0-9]+\.", "", text)
     text = re.sub(r"_+", "", text)
     text = re.sub("&quot;", "", text)
+    text = re.sub(r"[“”\"‘’]", "", text)
+    text = re.sub(r"[\n ]+", " ", text)
     text = text.strip()
     return text
 
@@ -235,7 +247,8 @@ def gen_q_pause():
     return p
 
 def question_specific_person(name, seeds):
-    send_to_display(name.upper())
+    name_text = "\n".join([4*("".join([3*name.upper() + " "]))])
+    send_to_display_rly_big(name_text)
     text_to_speech(random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".", "cs-CZ")
 
     for x in range(SECONDS_FOR_ENTRANCE):

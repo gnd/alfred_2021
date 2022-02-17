@@ -33,7 +33,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
     #screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     # font = pygame.font.Font(pygame.font.get_default_font(), 36)
-    font = pygame.font.Font(FONT_FILE, 36)
+    font = pygame.font.Font(FONT_FILE, STATE_FONT_SIZE)
 
     running =  True
     while running:
@@ -66,6 +66,9 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
         input_lang = msg_dict.get("input_lang")
         output_lang = msg_dict.get("output_lang")
         model = msg_dict.get("model")
+        font_size = msg_dict.get("font_size")
+
+        font_size = int(font_size) if font_size else FONT_SIZE
 
         fc = (255,255,255)
         if fill_color:
@@ -88,7 +91,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
                 width=SCREEN_WIDTH-2*padding_left,
                 fontname=font_fname,
                 lineheight=1,
-                fontsize=FONT_SIZE,
+                fontsize=font_size,
                 align=align
             )
 
@@ -101,7 +104,7 @@ def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
                 width=SCREEN_WIDTH-2*padding_left,
                 fontname=font_fname,
                 lineheight=1,
-                fontsize=FONT_SIZE,
+                fontsize=font_size,
                 align=align
             )
             
