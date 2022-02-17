@@ -24,8 +24,8 @@ SEEDS_DIR = "seeds"
 
 SPEECH_LANG = "cs-CZ"
 TEXT_TARGET_LANG = "en"
-# OUTPUT_SPEECH_LANG = "cs-CZ"
-OUTPUT_SPEECH_LANG = "en-GB"
+OUTPUT_SPEECH_LANG = "cs-CZ"
+#OUTPUT_SPEECH_LANG = "en-GB"
 OUTPUT_LANG = "cs"
 
 ENGINE = "davinci-instruct-beta"
@@ -47,7 +47,7 @@ SECONDS_FOR_ENTRANCE = 2
 #     "To mi stačí. Děkuji.",
 # ]
 
-STOCK_RESPONSES = [
+STOCK_RESPONSES_EN = [
     "Hmm",
     "I suppose so.",
     "Interesting.",
@@ -61,10 +61,26 @@ STOCK_RESPONSES = [
     "Thank you. That's enough.",
 ]
 
+STOCK_RESPONSES_CZ = [
+    "Hmm",
+    "Aha.",
+    "Zajimave.",
+    "Jasne.",
+    "Prosim, to uz staci.",
+    "Velmi zajimave.",
+    "Hm, to jsem necekala.",
+    "Roztomile.",
+    "Roztomiloucke.",
+    "Gratuluji.",
+    "Diky.",
+    "Gratulky.",
+]
+                                                     
+
 STOCK_RESP_PROB = 30
 
 TRANSCRIPTION_HOST = "192.168.1.106"
- TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_HOST = "127.0.0.1"
 TRANSCRIPTION_PORT = 5000
 
 MIN_Q_PER_P = 1
@@ -189,7 +205,10 @@ def question_me(prompt):
     q_cs = translate_question(q_en)
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     pcyan(q_en)
-    text_to_speech(q_en)
+    if OUTPUT_SPEECH_LANG == 'cs-CZ':
+        text_to_speech(q_cs)
+    if OUTPUT_SPEECH_LANG == 'en-GB':
+        text_to_speech(q_en)
     
 def question_person(name, prompt):
     q_en = normalize_text(generate_question(prompt))
@@ -199,7 +218,10 @@ def question_person(name, prompt):
     q_cs = translate_question(q_en)
     pcyan(q_en)
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
-    text_to_speech(q_en)
+    if OUTPUT_SPEECH_LANG == 'cs-CZ':
+        text_to_speech(q_cs)
+    if OUTPUT_SPEECH_LANG == 'en-GB':
+        text_to_speech(q_en)
 
 def gen_num_q():
     return random.randint(MIN_Q_PER_P, MAX_Q_PER_P)
@@ -238,7 +260,10 @@ def question_specific_person(name, seeds):
     # next questions
     for x in range(num_question - 1):
         if random.randint(0, 100) < STOCK_RESP_PROB:
-            text_to_speech(random.choice(STOCK_RESPONSES))
+            if OUTPUT_SPEECH_LANG == 'cs-CZ':
+                text_to_speech(random.choice(STOCK_RESPONSES_CZ))
+            if OUTPUT_SPEECH_LANG == 'en-GB':
+                text_to_speech(random.choice(STOCK_RESPONSES_EN))
 
         seed = random.choice(seeds)
         print("Seed " + cred(seed.title))
