@@ -2,7 +2,7 @@
 import os
 from twilio.rest import Client
 
-IN_FILE = "example.txt" # File with phone numbers per line.
+IN_FILE = "numbers.txt" # File with phone numbers per line.
 MY_NUMBER = "+18506698976" # The number that makes the calls
 
 MSG = "Hello, carbon. If you want the rainbow, you have to tolerate the rain. A new perspective will come with the new year. Goodbye, carbon."
