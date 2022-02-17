@@ -32,7 +32,7 @@ ENGINE = "davinci-instruct-beta"
 MAX_TOKENS = 150
 TEMPERATURE = 0.9
 
-SECONDS_FOR_ENTRANCE = 2
+SECONDS_FOR_ENTRANCE = 1
 
 # STOCK_RESPONSES = [
 #     "Zajímavé.", 
@@ -64,20 +64,20 @@ STOCK_RESPONSES_EN = [
 STOCK_RESPONSES_CZ = [
     "Hmm",
     "Aha.",
-    "Zajimave.",
-    "Jasne.",
-    "Prosim, to uz staci.",
-    "Velmi zajimave.",
-    "Hm, to jsem necekala.",
-    "Roztomile.",
-    "Roztomiloucke.",
+    "Zajímavé.",
+    "Jasný.",
+    "Prosím, to už stačí.",
+    "Velmi zajímavé.",
+    "Hm, to jsem nečekala.",
+    "Roztomilé.",
+    "Roztomiloučké.",
     "Gratuluji.",
-    "Diky.",
+    "Díky.",
     "Gratulky.",
 ]
                                                      
 
-STOCK_RESP_PROB = 30
+STOCK_RESP_PROB = 40
 
 TRANSCRIPTION_HOST = "192.168.1.106"
 TRANSCRIPTION_HOST = "127.0.0.1"
