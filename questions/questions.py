@@ -34,18 +34,23 @@ TEMPERATURE = 0.9
 
 SECONDS_FOR_ENTRANCE = 0
 
-# STOCK_RESPONSES = [
-#     "Zajímavé.", 
-#     "Ahá", 
-#     "Jasně.", 
-#     "Ani nepokračuj.", 
-#     "Velice zajímavé.", 
-#     "Mm, to jsem nečekela.", 
-#     "To jsem nečekela.",
-#     "Á, to zní moc hezky.",
-#     "To jsem ráda.",
-#     "To mi stačí. Děkuji.",
-# ]
+STOCK_RESPONSES_CZ = [
+    "Zajímavé.", 
+    "Ahá", 
+    "Jasně.", 
+    "Ani nepokračuj.", 
+    "Velice zajímavé.", 
+    "Mm, to jsem nečekela.", 
+    "To jsem nečekela.",
+    "Á, to zní moc hezky.",
+    "To jsem ráda.",
+    "To mi stačí. Děkuji.",
+    "Roztomilé.",
+    "Roztomiloučké.",
+    "Gratuluji.",
+    "Díky.",
+    "Gratulky.",
+]
 
 STOCK_RESPONSES_EN = [
     "Hmm",
@@ -61,23 +66,8 @@ STOCK_RESPONSES_EN = [
     "Thank you. That's enough.",
 ]
 
-STOCK_RESPONSES_CZ = [
-    "Hmm",
-    "Aha.",
-    "Zajímavé.",
-    "Jasný.",
-    "Prosím, to už stačí.",
-    "Velmi zajímavé.",
-    "Hm, to jsem nečekala.",
-    "Roztomilé.",
-    "Roztomiloučké.",
-    "Gratuluji.",
-    "Díky.",
-    "Gratulky.",
-]
-                                                     
 
-STOCK_RESP_PROB = 40
+STOCK_RESP_PROB = 50
 
 TRANSCRIPTION_HOST = "192.168.1.106"
 TRANSCRIPTION_HOST = "127.0.0.1"
