@@ -68,6 +68,7 @@ STOCK_RESPONSES_EN = [
 
 
 STOCK_RESP_PROB = 50
+EN_QUESTION_PROB = 40
 
 TRANSCRIPTION_HOST = "192.168.1.106"
 TRANSCRIPTION_HOST = "127.0.0.1"
@@ -75,6 +76,10 @@ TRANSCRIPTION_PORT = 5000
 
 MIN_Q_PER_P = 1
 MAX_Q_PER_P = 3
+
+# Median and variance for answer duration
+SPEECH_MU = 30 
+SPEECH_SIGMA = 25 
 
 RLY_BIG_FONT_SIZE = 333
 
@@ -212,7 +217,7 @@ def question_me(prompt, lang):
     if lang == 'en':
         text_to_speech(q_en, "en-GB")
     
-def question_person(name, prompt):
+def question_person(name, prompt, lang):
     q_en = normalize_text(generate_question(prompt))
     if len(q_en) > 0:
         q_en = q_en[0].lower() + q_en[1:]
@@ -220,18 +225,18 @@ def question_person(name, prompt):
     q_cs = translate_question(q_en)
     pcyan(q_en)
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
-    if OUTPUT_SPEECH_LANG == 'cs-CZ':
-        text_to_speech(q_cs)
-    if OUTPUT_SPEECH_LANG == 'en-GB':
-        text_to_speech(q_en)
+    if lang == 'cz':
+        text_to_speech(q_cs, 'cs-CZ')
+    if lang == 'en':
+        text_to_speech(q_en, 'en-GB')
 
 def gen_num_q():
     return random.randint(MIN_Q_PER_P, MAX_Q_PER_P)
 
 def gen_q_pause():
-    p = random.gauss(30, 25)
+    p = random.gauss(SPEECH_MU, SPEECH_SIGMA)
     while p <= 0:
-        p = random.gauss(30, 25)
+        p = random.gauss(SPEECH_MU, SPEECH_SIGMA)
     pgreen(p)
     # return 0
     return p
@@ -379,9 +384,16 @@ def part_two(names, seeds):
         seed = random.choice(seeds)
         print("Seed " + cred(seed.title))
         prompt = get_prompt(seed) # Random seed, random prompt
+
+        # Determine language first based on OUTPUT_SPEECH_LANG
+        if OUTPUT_SPEECH_LANG == 'cs-CZ':
+            lang = "cz"
+            # But language can be still overriden by a dice roll
+            if random.randint(0, 100) < EN_QUESTION_PROB:
+                lang = "en"
         
-        pyellow(f"Generating question for {name}.")
-        question_person(name, prompt)
+        pyellow(f"Generating question for {name} in {lang}")
+        question_person(name, prompt, lang)
 
         # wait
         sleep_time = random.randint(1, 15)
