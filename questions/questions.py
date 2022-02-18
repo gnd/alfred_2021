@@ -32,7 +32,7 @@ ENGINE = "davinci-instruct-beta"
 MAX_TOKENS = 150
 TEMPERATURE = 0.9
 
-SECONDS_FOR_ENTRANCE = 1
+SECONDS_FOR_ENTRANCE = 0
 
 # STOCK_RESPONSES = [
 #     "Zajímavé.", 
@@ -212,15 +212,15 @@ def translate_question(q):
     print("Translation done...")
     return out
 
-def question_me(prompt):
+def question_me(prompt, lang):
     q_en = normalize_text(generate_question(prompt))
     q_cs = translate_question(q_en)
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     pcyan(q_en)
-    if OUTPUT_SPEECH_LANG == 'cs-CZ':
-        text_to_speech(q_cs)
-    if OUTPUT_SPEECH_LANG == 'en-GB':
-        text_to_speech(q_en)
+    if lang == 'cz':
+        text_to_speech(q_cs, "cs-CZ")
+    if lang == 'en':
+        text_to_speech(q_en, "en-GB")
     
 def question_person(name, prompt):
     q_en = normalize_text(generate_question(prompt))
@@ -246,7 +246,7 @@ def gen_q_pause():
     # return 0
     return p
 
-def question_specific_person(name, seeds):
+def question_specific_person(name, seeds, lang):
     name_text = "\n".join([4*("".join([3*name.upper() + " "]))])
     send_to_display_rly_big(name_text)
     text_to_speech(random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".", "cs-CZ")
@@ -265,7 +265,7 @@ def question_specific_person(name, seeds):
     prompt = get_prompt(seed)
     
     pmagenta("Generating question...")
-    question_me(prompt)
+    question_me(prompt, lang)
 
     pmagenta("Giving time to answer...")
     time.sleep(gen_q_pause())
@@ -273,9 +273,9 @@ def question_specific_person(name, seeds):
     # next questions
     for x in range(num_question - 1):
         if random.randint(0, 100) < STOCK_RESP_PROB:
-            if OUTPUT_SPEECH_LANG == 'cs-CZ':
+            if lang == 'cz':
                 text_to_speech(random.choice(STOCK_RESPONSES_CZ))
-            if OUTPUT_SPEECH_LANG == 'en-GB':
+            if lang == 'en':
                 text_to_speech(random.choice(STOCK_RESPONSES_EN))
 
         seed = random.choice(seeds)
@@ -283,7 +283,7 @@ def question_specific_person(name, seeds):
         
         prompt = get_prompt(seed)
         pmagenta("Generating question...")
-        question_me(prompt)
+        question_me(prompt, lang)
         pmagenta("Giving time to answer...")
         time.sleep(gen_q_pause())
 
@@ -357,13 +357,23 @@ def part_one(names, seeds):
     cmd = ""
     idx = 0
     while cmd != "q":
+        # Determine language first based on OUTPUT_SPEECH_LANG
+        if OUTPUT_SPEECH_LANG == 'cs-CZ':
+            lang = "cz"
+        if OUTPUT_SPEECH_LANG == 'en-GB':
+            lang = "en"
+        # But language can be still overriden by a special command
+        if cmd == "e":
+            lang = "en"
+        if cmd == "c":
+            lang = "cz"
         if idx % len(names) == 0:
             idx = 0
             random.shuffle(names) # Shuffle names randomly
         name = names[idx]
         print_people(names, idx) # Prints order and currently questioned person.
         idx = idx + 1
-        cmd = question_specific_person(name, seeds)
+        cmd = question_specific_person(name, seeds, lang)
 
 def part_two(names, seeds):
     idx = 0
@@ -381,7 +391,6 @@ def part_two(names, seeds):
         prompt = get_prompt(seed) # Random seed, random prompt
         
         pyellow(f"Generating question for {name}.")
-        
         question_person(name, prompt)
 
         # wait
