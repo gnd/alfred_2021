@@ -25,8 +25,9 @@ SEEDS_DIR = "seeds"
 SPEECH_LANG = "cs-CZ"
 TEXT_TARGET_LANG = "en"
 OUTPUT_SPEECH_LANG = "cs-CZ"
-#OUTPUT_SPEECH_LANG = "en-GB"
-OUTPUT_LANG = "cs"
+OUTPUT_SPEECH_LANG = "en-GB"
+OUTPUT_LANG_CZ = "cs"
+OUTPUT_LANG_RU = 'ru'
 
 ENGINE = "davinci-instruct-beta"
 MAX_TOKENS = 150
@@ -78,8 +79,8 @@ MIN_Q_PER_P = 1
 MAX_Q_PER_P = 3
 
 # Median and variance for answer duration
-SPEECH_MU = 30 
-SPEECH_SIGMA = 25 
+SPEECH_MU = 20 
+SPEECH_SIGMA = 25
 
 RLY_BIG_FONT_SIZE = 333
 
@@ -198,10 +199,13 @@ def generate_question(prompt):
     print("Question generated...")
     return q
 
-def translate_question(q):
+def translate_question(q, lang):
     print("Translating question...")
     # Translate generated text back to the language of speech
-    out = translate_client.translate(q, target_language=OUTPUT_LANG)
+    if lang == 'cz':
+        out = translate_client.translate(q, target_language=OUTPUT_LANG_CZ)
+    if lang == 'ru':
+        out = translate_client.translate(q, target_language=OUTPUT_LANG_RU)
     out = out["translatedText"]
     out = re.sub(r"[0-9]+\. ", "", out)
     print("Translation done...")
@@ -209,26 +213,32 @@ def translate_question(q):
 
 def question_me(prompt, lang):
     q_en = normalize_text(generate_question(prompt))
-    q_cs = translate_question(q_en)
+    q_cs = translate_question(q_en, 'cz')
+    q_ru = translate_question(q_en, 'ru')
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     pcyan(q_en)
     if lang == 'cz':
         text_to_speech(q_cs, "cs-CZ")
     if lang == 'en':
         text_to_speech(q_en, "en-GB")
+    if lang == 'ru':
+        text_to_speech(q_ru, "ru-RU")
     
 def question_person(name, prompt, lang):
     q_en = normalize_text(generate_question(prompt))
     if len(q_en) > 0:
         q_en = q_en[0].lower() + q_en[1:]
     q_en =name + ", " + q_en 
-    q_cs = translate_question(q_en)
+    q_cs = translate_question(q_en, 'cz')
+    q_ru = translate_question(q_en, 'ru')
     pcyan(q_en)
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     if lang == 'cz':
         text_to_speech(q_cs, 'cs-CZ')
     if lang == 'en':
         text_to_speech(q_en, 'en-GB')
+    if lang == 'ru':
+        text_to_speech(q_ru, 'ru-RU')
 
 def gen_num_q():
     return random.randint(MIN_Q_PER_P, MAX_Q_PER_P)
@@ -362,6 +372,8 @@ def part_one(names, seeds):
             lang = "en"
         if cmd == "c":
             lang = "cz"
+        if cmd == "r":
+            lang = "ru"
         if idx % len(names) == 0:
             idx = 0
             random.shuffle(names) # Shuffle names randomly
@@ -386,11 +398,21 @@ def part_two(names, seeds):
         prompt = get_prompt(seed) # Random seed, random prompt
 
         # Determine language first based on OUTPUT_SPEECH_LANG
+        if OUTPUT_SPEECH_LANG == 'en-GB':
+            lang = "en"
         if OUTPUT_SPEECH_LANG == 'cs-CZ':
             lang = "cz"
             # But language can be still overriden by a dice roll
             if random.randint(0, 100) < EN_QUESTION_PROB:
                 lang = "en"
+
+        # Also generate question in Russian for Anastasia, and Czech for Eliska and Lenka
+        if (name == 'Anastázia'):
+            lang = 'ru'
+        if (name == 'Lenka'):
+            lang = 'cz'
+        if (name == 'Eliška'):
+            lang = 'cz'
         
         pyellow(f"Generating question for {name} in {lang}")
         question_person(name, prompt, lang)
