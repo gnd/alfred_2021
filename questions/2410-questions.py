@@ -14,7 +14,7 @@ TEXT_TARGET_LANG = "en"
 OUTPUT_SPEECH_LANG = "cs-CZ"
 OUTPUT_LANG = "cs"
 
-ENGINE = "davinci"
+ENGINE = "text-davinci-002"
 MAX_TOKENS = 150
 TEMPERATURE = 0.9
 
@@ -122,7 +122,7 @@ def generate_question(prompt):
     question = ""
     while len(question) < 1:
         gpt3_resp = openai.Completion.create(
-            engine="davinci-instruct-beta",
+            engine="text-davinci-002",
             prompt=prompt,
             temperature=0.9,
             max_tokens=64,

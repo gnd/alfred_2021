@@ -9,7 +9,7 @@ from google.cloud import texttospeech
 import utils
 from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word
 
-ENGINE = "davinci-instruct-beta"
+ENGINE = "text-davinci-002"
 MAX_TOKENS = 200
 TEMPERATURE = 0.9
 

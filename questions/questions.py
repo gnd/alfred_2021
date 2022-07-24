@@ -30,7 +30,7 @@ OUTPUT_LANG_CZ = "cs"
 OUTPUT_LANG_RU = 'ru'
 OUTPUT_LANG_SK = 'sk'
 
-ENGINE = "davinci-instruct-beta"
+ENGINE = "text-davinci-002"
 MAX_TOKENS = 150
 TEMPERATURE = 0.9
 

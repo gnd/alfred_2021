@@ -27,7 +27,7 @@ from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
 SPEECH_LANG = "en-US"
 OUTPUT_SPEECH_LANG = "en-US"
 
-ENGINE = "davinci-instruct-beta"
+ENGINE = "text-davinci-002"
 MAX_TOKENS = 200
 TEMPERATURE = 0.9
 
@@ -110,13 +110,13 @@ def recognize_engine_switch(text):
         if engine == kw_normal:
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting engine - Davinci )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_engine normal")
-            ENGINE = "davinci"
+            ENGINE = "text-davinci-002"
             beep(0.3)
             return True
         if engine == kw_instruct:
             pmagenta(",.-~*´¨¯¨`*·~-.¸-( Setting engine - Instruct )-,.-~*´¨¯¨`*·~-.¸")
             send_simple_msg("set_engine instruct")
-            ENGINE = "davinci-instruct-beta"
+            ENGINE = "text-davinci-002"
             beep(0.3)
             return True
     return False

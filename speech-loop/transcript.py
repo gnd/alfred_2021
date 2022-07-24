@@ -27,8 +27,8 @@ from kw_parser import replace_punct, recognize_kws, INSTRUCT_RE, NORMAL_RE
 
 from gpt3 import GPT3Client
 
-DAVINCI = "davinci"
-DAVINCI_BETA_INSTRUCT = "davinci-instruct-beta"
+DAVINCI = "text-davinci-002"
+DAVINCI_BETA_INSTRUCT = "text-davinci-002"
 
 SPEECH_EN = "en-US"
 SPEECH_CS = "cs-CZ"

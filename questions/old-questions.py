@@ -26,7 +26,7 @@ TEXT_TARGET_LANG = "en"
 OUTPUT_SPEECH_LANG = "cs-CZ"
 OUTPUT_LANG = "cs"
 
-ENGINE = "davinci-instruct-beta"
+ENGINE = "text-davinci-002"
 MAX_TOKENS = 150
 TEMPERATURE = 0.9
 
