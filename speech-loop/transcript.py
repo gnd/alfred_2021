@@ -32,6 +32,7 @@ DAVINCI_BETA_INSTRUCT = "davinci-instruct-beta"
 
 SPEECH_EN = "en-US"
 SPEECH_CS = "cs-CZ"
+SPEECH_sk = "sk-SK
 TEXT_EN = "en"
 TEXT_CS = "cs"
 
@@ -223,9 +224,16 @@ class App:
 
     def translate(self):
         pyellow(f"Translating text: {self.text_buffer_window}")
+        # TODO - switch to Slovak for Kiosk performance
+        # TODO - set this also in the config file
+        self.text_buffer_window,
+        if (self.speech_lang == SPEECH_CS or self.speech_lang == SPEECH_SK): 
+            target_language = TEXT_EN
+        else:
+            target_language = TEXT_CS
         translation = self.translate_client.translate(
             self.text_buffer_window,
-            target_language=TEXT_EN if self.speech_lang == SPEECH_CS else TEXT_CS
+            target_language
         )["translatedText"]
         pyellow(f"Received: {translation}")
         translation = sanitize_translation(translation)

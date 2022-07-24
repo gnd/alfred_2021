@@ -32,13 +32,13 @@ DAVINCI_BETA_INSTRUCT = "davinci-instruct-beta"
 
 SPEECH_EN = "en-US"
 SPEECH_CS = "cs-CZ"
+SPEECH_SK = "sk-SK"
 TEXT_EN = "en"
 TEXT_CS = "cs"
+TEXT_SK = "sk"
 
 # TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_HOST = "127.0.0.1"
-# GND HOME
-TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_HOST = "192.168.26.118"
 TRANSCRIPTION_PORT = 5000
 
 DEFAULT_PADDING_TOP = 40
@@ -160,6 +160,14 @@ class App:
                 self.gpt3.output_speech_lang = SPEECH_CS
                 pred("Setting output Czech")
                 self.dm.display_action("output: Czech")
+                time.sleep(1)
+                continue
+
+            if kw_dict.get("out_slovak"):
+                self.output_lang = "sk"
+                self.gpt3.output_speech_lang = SPEECH_SK
+                pred("Setting output Slovak")
+                self.dm.display_action("output: Slovak")
                 time.sleep(1)
                 continue
 
@@ -299,9 +307,17 @@ class App:
 
     def translate(self):
         pyellow(f"Translating text: {self.text_buffer_window}")
+        # TODO - switch to sk for kiosk
+        # TODO - add to config
+        if self.speech_lang == SPEECH_CS:
+            target_language = TEXT_EN
+        if self.speech_lang == SPEECH_SK:
+            target_language = TEXT_EN
+        else:
+            target_language = TEXT_CS
         translation = self.translate_client.translate(
             self.text_buffer_window,
-            target_language=TEXT_EN if self.speech_lang == SPEECH_CS else TEXT_CS
+            target_language
         )["translatedText"]
         pyellow(f"Received: {translation}")
         translation = sanitize_translation(translation)

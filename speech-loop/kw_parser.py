@@ -21,6 +21,7 @@ IN_EN_RE = rf"\b(vstup anglicky)\b"
 
 OUT_CS_RE = rf"\b(output Czech|output check|output chess|output chair|výstup česky|output bohemian|bohemian out|Czech out|chair out|check out)\b"
 OUT_EN_RE = rf"\b(output English|výstup anglicky|English out)\b"
+OUT_SK_RE = rf"\b(output Slovak|výstup slovensky|Slovak out|Slovakian out)\b"
 
 ZOBRAZ_RE = rf"\b(zobraz|ukaž|show)\b"
 
@@ -48,6 +49,7 @@ def recognize_kws(text):
 
     out_czech = True if re.search(OUT_CS_RE, text, re.I) else False
     out_english = True if re.search(OUT_EN_RE, text, re.I) else False
+    out_slovak = True if re.search(OUT_SK_RE, text, re.I) else False
 
     show = True if re.search(ZOBRAZ_RE, text, re.I) else False
 
@@ -63,6 +65,7 @@ def recognize_kws(text):
         "in_english": in_english,
         "out_czech": out_czech,
         "out_english": out_english,
+        "out_slovak": out_slovak,
         "show": show
     }
 

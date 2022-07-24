@@ -29,9 +29,8 @@ from display_sender import DisplaySender
 from display_manager import DisplayManager
 
 # TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_HOST = "127.0.0.1"
-# GND HOME
-TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_HOST = "192.168.26.118"
+
 TRANSCRIPTION_PORT = 5000
 
 class TongueTwister:

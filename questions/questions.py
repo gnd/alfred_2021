@@ -28,6 +28,7 @@ OUTPUT_SPEECH_LANG = "cs-CZ"
 OUTPUT_SPEECH_LANG = "en-GB"
 OUTPUT_LANG_CZ = "cs"
 OUTPUT_LANG_RU = 'ru'
+OUTPUT_LANG_SK = 'sk'
 
 ENGINE = "davinci-instruct-beta"
 MAX_TOKENS = 150
@@ -71,8 +72,8 @@ STOCK_RESPONSES_EN = [
 STOCK_RESP_PROB = 50
 EN_QUESTION_PROB = 40
 
-TRANSCRIPTION_HOST = "192.168.1.106"
-TRANSCRIPTION_HOST = "127.0.0.1"
+TRANSCRIPTION_HOST = "192.168.26.118"
+#TRANSCRIPTION_HOST = "127.0.0.1"
 TRANSCRIPTION_PORT = 5000
 
 MIN_Q_PER_P = 1
@@ -206,6 +207,8 @@ def translate_question(q, lang):
         out = translate_client.translate(q, target_language=OUTPUT_LANG_CZ)
     if lang == 'ru':
         out = translate_client.translate(q, target_language=OUTPUT_LANG_RU)
+    if lang == 'sk':
+        out = translate_client.translate(q, target_language=OUTPUT_LANG_SK)
     out = out["translatedText"]
     out = re.sub(r"[0-9]+\. ", "", out)
     print("Translation done...")
@@ -213,8 +216,10 @@ def translate_question(q, lang):
 
 def question_me(prompt, lang):
     q_en = normalize_text(generate_question(prompt))
+    # TODO - isnt triple translation too slow ? 
     q_cs = translate_question(q_en, 'cz')
-    q_ru = translate_question(q_en, 'ru')
+#    q_ru = translate_question(q_en, 'ru')
+    q_sk = translate_question(q_en, 'sk')
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     pcyan(q_en)
     if lang == 'cz':
@@ -223,14 +228,18 @@ def question_me(prompt, lang):
         text_to_speech(q_en, "en-GB")
     if lang == 'ru':
         text_to_speech(q_ru, "ru-RU")
+    if lang == 'sk':
+        text_to_speech(q_sk, "sk-SK")
     
 def question_person(name, prompt, lang):
     q_en = normalize_text(generate_question(prompt))
     if len(q_en) > 0:
         q_en = q_en[0].lower() + q_en[1:]
     q_en =name + ", " + q_en 
+    # TODO - triple translation
     q_cs = translate_question(q_en, 'cz')
-    q_ru = translate_question(q_en, 'ru')
+#    q_ru = translate_question(q_en, 'ru')
+    q_sk = translate_question(q_sk, 'sk')
     pcyan(q_en)
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     if lang == 'cz':
@@ -239,6 +248,8 @@ def question_person(name, prompt, lang):
         text_to_speech(q_en, 'en-GB')
     if lang == 'ru':
         text_to_speech(q_ru, 'ru-RU')
+    if lang == 'sk':
+        text_to_speech(q_sk, 'sk-SK')
 
 def gen_num_q():
     return random.randint(MIN_Q_PER_P, MAX_Q_PER_P)
@@ -374,6 +385,8 @@ def part_one(names, seeds):
             lang = "cz"
         if cmd == "r":
             lang = "ru"
+        if cmd == "s":
+            lang = "sk"
         if idx % len(names) == 0:
             idx = 0
             random.shuffle(names) # Shuffle names randomly
@@ -406,9 +419,9 @@ def part_two(names, seeds):
             if random.randint(0, 100) < EN_QUESTION_PROB:
                 lang = "en"
 
-        # Also generate question in Russian for Anastasia, and Czech for Eliska and Lenka
+        # Also generate question in Czech for Anastazia, Eliska and Lenka
         if (name == 'Anastázia'):
-            lang = 'ru'
+            lang = 'cz'
         if (name == 'Lenka'):
             lang = 'cz'
         if (name == 'Eliška'):
