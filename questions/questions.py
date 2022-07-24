@@ -22,6 +22,8 @@ from display_sender import DisplaySender
 IN_FILE_NAMES = "names.txt"
 SEEDS_DIR = "seeds"
 
+# TODO CHANGE BACK MAX QS TO 3 AND ADD PEOPLE FOR KIOSK
+
 SPEECH_LANG = "cs-CZ"
 TEXT_TARGET_LANG = "en"
 OUTPUT_SPEECH_LANG = "cs-CZ"
@@ -77,10 +79,10 @@ TRANSCRIPTION_HOST = "192.168.26.118"
 TRANSCRIPTION_PORT = 5000
 
 MIN_Q_PER_P = 1
-MAX_Q_PER_P = 3
+MAX_Q_PER_P = 1
 
 # Median and variance for answer duration
-SPEECH_MU = 20 
+SPEECH_MU = 90 
 SPEECH_SIGMA = 25
 
 RLY_BIG_FONT_SIZE = 333
@@ -239,7 +241,7 @@ def question_person(name, prompt, lang):
     # TODO - triple translation
     q_cs = translate_question(q_en, 'cz')
 #    q_ru = translate_question(q_en, 'ru')
-    q_sk = translate_question(q_sk, 'sk')
+    q_sk = translate_question(q_en, 'sk')
     pcyan(q_en)
     send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     if lang == 'cz':

@@ -10,7 +10,7 @@ import utils
 from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word
 
 ENGINE = "text-davinci-002"
-MAX_TOKENS = 200
+MAX_TOKENS = 400
 TEMPERATURE = 0.9
 
 MAX_SUCC_BLANKS = 3
@@ -136,7 +136,7 @@ class GPT3Client:
         synthesis_input = texttospeech.SynthesisInput(text=text)
         voice = texttospeech.VoiceSelectionParams(language_code=self.output_speech_lang)
         audio_config = texttospeech.AudioConfig(
-            speaking_rate=0.9, # 0.75, # 0.5 - 4.0
+            speaking_rate=0.7, # 0.75, # 0.5 - 4.0
             effects_profile_id=['medium-bluetooth-speaker-class-device'],
             audio_encoding=texttospeech.AudioEncoding.MP3,
             pitch=0, # 20 for dying patient voice
