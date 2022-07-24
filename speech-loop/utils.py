@@ -112,7 +112,8 @@ SPEECH_CODE_TO_LANG_CODE = {
     "fr-FR": "fr",
     "de-DE": "de",
     "ru-RU": "ru",
-    "cmn-CN": "zh-CN"
+    "cmn-CN": "zh-CN",
+    "sk-SK": "sk"
 }
 
 class SpeechCode:
@@ -123,6 +124,7 @@ class SpeechCode:
         self.GERMAN = "de-DE"
         self.RUSSIAN = "ru-RU"
         self.CHINESE = "cmn-CN"
+        self.SLOVAK = "sk-SK"
 
 class LangCode:
     def __init__(self):
@@ -132,6 +134,7 @@ class LangCode:
         self.GERMAN = "de"
         self.RUSSIAN = "ru"
         self.CHINESE = "zh-CN"
+        self.SLOVAK = "sk"
 
 def getLangCode(speech_code):
     return SPEECH_CODE_TO_LANG_CODE.get(speech_code)
