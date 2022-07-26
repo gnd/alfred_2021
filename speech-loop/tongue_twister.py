@@ -15,7 +15,7 @@ import random
 import socket
 import threading
 import subprocess
-import ConfigParser
+import configparser
 
 from termcolor import colored
 from playsound import playsound
@@ -31,13 +31,13 @@ from display_sender import DisplaySender
 from display_manager import DisplayManager
 
 # Load variables from config
-settings_file = os.path.join(sys.path[0], '../settings.ini')
-config = ConfigParser.ConfigParser()
+settings = os.path.join(sys.path[0], '../settings.ini')
+config = configparser.ConfigParser()
 config.read(settings)
 
 # Assign config variables
 TRANSCRIPTION_HOST = config.get('display', 'DISPLAY_HOST')
-TRANSCRIPTION_PORT = config.get('display', 'DISPLAY_PORT')
+TRANSCRIPTION_PORT = int(config.get('display', 'DISPLAY_PORT'))
 
 class TongueTwister:
     def __init__(self, speech_lang="en-US", exit_word="Showtime"):
