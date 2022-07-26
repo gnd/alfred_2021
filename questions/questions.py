@@ -46,7 +46,6 @@ SPEECH_MU = config.get('questions', 'SPEECH_MU')
 SPEECH_SIGMA = config.get('questions', 'SPEECH_SIGMA')
 
 # Define some language codes
->>>>>>> c14c0f68223cc2a968661b833050c72ccecca5b5
 SPEECH_LANG = "cs-CZ"
 TEXT_TARGET_LANG = "en"
 OUTPUT_SPEECH_LANG = "cs-CZ"
@@ -87,26 +86,6 @@ STOCK_RESPONSES_EN = [
     "Thank you. That's enough.",
 ]
 
-<<<<<<< HEAD
-
-STOCK_RESP_PROB = 50
-EN_QUESTION_PROB = 40
-
-TRANSCRIPTION_HOST = "192.168.26.118"
-#TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_PORT = 5000
-
-MIN_Q_PER_P = 1
-MAX_Q_PER_P = 1
-
-# Median and variance for answer duration
-SPEECH_MU = 90 
-SPEECH_SIGMA = 25
-
-RLY_BIG_FONT_SIZE = 333
-
-=======
->>>>>>> c14c0f68223cc2a968661b833050c72ccecca5b5
 display = DisplaySender(
     TRANSCRIPTION_HOST,
     TRANSCRIPTION_PORT
