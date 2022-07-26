@@ -147,11 +147,7 @@ class GPT3Client:
         config.read(settings)
         SPEAKING_RATE = config.get('text-to-speech', 'SPEAKING_RATE')
         audio_config = texttospeech.AudioConfig(
-<<<<<<< HEAD
-            speaking_rate=0.7, # 0.75, # 0.5 - 4.0
-=======
             speaking_rate=SPEAKING_RATE, # 0.75, # 0.5 - 4.0
->>>>>>> c14c0f68223cc2a968661b833050c72ccecca5b5
             effects_profile_id=['medium-bluetooth-speaker-class-device'],
             audio_encoding=texttospeech.AudioEncoding.MP3,
             pitch=0, # 20 for dying patient voice
