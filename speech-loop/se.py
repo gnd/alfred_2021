@@ -10,7 +10,7 @@ import time
 import socket
 import threading
 import subprocess
-import ConfigParser
+import configparser
 
 from playsound import playsound
 from google.cloud import speech
@@ -31,25 +31,23 @@ from gpt3 import GPT3Client
 
 # Load variables from config
 settings = os.path.join(sys.path[0], '../settings.ini')
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(settings)
 
 # Assign config variables
 OPENAI_MODEL = config.get('openai', 'MODEL')
 TRANSCRIPTION_HOST = config.get('display', 'DISPLAY_HOST')
-TRANSCRIPTION_PORT = config.get('display', 'DISPLAY_PORT')
-DEBUG_HOST = config.get('display', 'DEBUG_HOST')
-DEBUG_PORT = config.get('display', 'DEBUG_PORT')
-DEFAULT_PADDING_TOP = config.get('display', 'DEFAULT_PADDING_TOP')
-DEFAULT_PADDING_LEFT = config.get('display', 'DEFAULT_PADDING_LEFT')
+TRANSCRIPTION_PORT = int(config.get('display', 'DISPLAY_PORT'))
+DEFAULT_PADDING_TOP = int(config.get('display', 'DEFAULT_PADDING_TOP'))
+DEFAULT_PADDING_LEFT = int(config.get('display', 'DEFAULT_PADDING_LEFT'))
 FONT_FILE = config.get('display', 'FONT')
-MAX_WORDS = config.get('display', 'MAX_WORDS')
-PAUSE_LENGTH = config.get('display', 'PAUSE_LENGTH')
+MAX_WORDS = int(config.get('display', 'MAX_WORDS'))
+PAUSE_LENGTH = int(config.get('display', 'PAUSE_LENGTH'))
 
 # Define some language codes
 SPEECH_EN = "en-US"
 SPEECH_CS = "cs-CZ"
-SPEECH_sk = "sk-SK"
+SPEECH_SK = "sk-SK"
 TEXT_EN = "en"
 TEXT_CS = "cs"
 TEXT_SK = "sk"
@@ -343,7 +341,7 @@ class App:
         print("Chop endword text:", text)
         kw_end = ["I'm out"] if self.speech_lang != "cs-CZ" else ["díky"]
     
-        if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
+        if re.search(rf"\b(.*)({kw_end[0]})\b", text, re.I):
             text = re.sub(rf"\b(díky|Díky|I'm out)\b", "", text)
             text = text.strip()
             print("Matched, returning:", text)

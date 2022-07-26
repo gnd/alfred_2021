@@ -1,9 +1,10 @@
 import os
+import sys
 import time
 import openai
 import random
 import subprocess
-import ConfigParser
+import configparser
 
 from termcolor import colored
 from google.cloud import texttospeech
@@ -13,14 +14,14 @@ from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, s
 
 # Load variables from config
 settings = os.path.join(sys.path[0], '../settings.ini')
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(settings)
 
 # Assign config variables
 OPENAI_MODEL = config.get('openai', 'MODEL')
-MAX_TOKENS_STORIES = config.get('openai', 'MAX_TOKENS_STORIES')
-TEMPERATURE_STORIES = config.get('openai', 'TEMPERATURE_STORIES')
-MAX_SUCC_BLANKS = config.get('openai', 'MAX_SUCC_BLANKS')
+MAX_TOKENS_STORIES = int(config.get('openai', 'MAX_TOKENS_STORIES'))
+TEMPERATURE_STORIES = float(config.get('openai', 'TEMPERATURE_STORIES'))
+MAX_SUCC_BLANKS = int(config.get('openai', 'MAX_SUCC_BLANKS'))
 
 class GPT3Client:
     def __init__(self, app, translate_client, engine=OPENAI_MODEL, input_lang="cs", output_speech_lang="cs-CZ"):
@@ -76,8 +77,8 @@ class GPT3Client:
             resp = openai.Completion.create(
                 engine=self.engine,
                 prompt=x,
-                max_tokens=MAX_TOKENSS_STORIES,
-                temperature=TEMPERATURE,
+                max_tokens=MAX_TOKENS_STORIES,
+                temperature=TEMPERATURE_STORIES,
             )
             end = time.time()
         
@@ -145,7 +146,7 @@ class GPT3Client:
 
         # Plz note we are asking for speaking rate every time
         config.read(settings)
-        SPEAKING_RATE = config.get('text-to-speech', 'SPEAKING_RATE')
+        SPEAKING_RATE = float(config.get('text-to-speech', 'SPEAKING_RATE'))
         audio_config = texttospeech.AudioConfig(
             speaking_rate=SPEAKING_RATE, # 0.75, # 0.5 - 4.0
             effects_profile_id=['medium-bluetooth-speaker-class-device'],
