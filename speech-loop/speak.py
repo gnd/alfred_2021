@@ -8,17 +8,23 @@ import openai
 import random
 import socket
 import subprocess
+import ConfigParser
+
 from google.cloud import speech
 from google.cloud import texttospeech
 from google.cloud import translate_v2 as translate
 
 from stt_loop import processMicrophoneStream
 
-OUTPUT_SPEECH_LANG = "en-GB"
+# Load variables from config
+settings = os.path.join(sys.path[0], '../settings.ini')
+config = ConfigParser.ConfigParser()
+config.read(settings)
 
-# TRANSCRIPTION_HOST = "localhost"
-TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_PORT = 5000
+OUTPUT_SPEECH_LANG = "en-GB"
+TRANSCRIPTION_HOST = config.get('display', 'DISPLAY_HOST')
+TRANSCRIPTION_PORT = config.get('display', 'DISPLAY_PORT')
+
 
 client = texttospeech.TextToSpeechClient()
 translate_client = translate.Client()
@@ -39,8 +45,12 @@ def text_to_speech(text):
     # Select the type of audio file you want returned
     # See: https://googleapis.dev/java/google-cloud-texttospeech/latest/com/google/cloud/texttospeech/v1/AudioConfig.html
     # For audio profiles see: https://cloud.google.com/text-to-speech/docs/audio-profiles#tts-audio-profile-python
+    # Plz note we are asking for speaking rate every time
+    config.read(settings)
+    SPEAKING_RATE = config.get('text-to-speech', 'SPEAKING_RATE')
+
     audio_config = texttospeech.AudioConfig(
-        speaking_rate=0.9, # 0.5 - 4.0
+        speaking_rate=SPEAKING_RATE, # 0.5 - 4.0
         effects_profile_id=['medium-bluetooth-speaker-class-device'],
         audio_encoding=texttospeech.AudioEncoding.MP3,
         pitch=3, # 20 for dying patient voice
@@ -63,8 +73,6 @@ def text_to_speech(text):
 def send_text(text, translation):
     sock = socket.socket()
     sock.connect((TRANSCRIPTION_HOST, TRANSCRIPTION_PORT))
-    # sock.send(text.encode())
-    # sock.send(("\n").encode())
     sock.send(translation.encode())
     sock.close()
 

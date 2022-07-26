@@ -59,7 +59,7 @@ def text_coda(text):
     return f'\nThis text cost {text_to_crowns(text)} crowns.'
 
 def recognize_stop_word(text):
-    if re.search(r"\b(quit|exit|sorry)\b", text, re.I):
+    if re.search(r"\b(exit)\b", text, re.I):
         pmagenta(",.-~*´¨¯¨`*·~-.¸-( Stopword Detected )-,.-~*´¨¯¨`*·~-.¸")
         return True
     else:

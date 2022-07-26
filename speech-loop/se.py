@@ -10,6 +10,8 @@ import time
 import socket
 import threading
 import subprocess
+import ConfigParser
+
 from playsound import playsound
 from google.cloud import speech
 from google.cloud import translate_v2 as translate
@@ -27,28 +29,31 @@ from kw_parser import replace_punct, recognize_kws, INSTRUCT_RE, NORMAL_RE
 
 from gpt3 import GPT3Client
 
-DAVINCI = "text-davinci-002"
-DAVINCI_BETA_INSTRUCT = "text-davinci-002"
+# Load variables from config
+settings = os.path.join(sys.path[0], '../settings.ini')
+config = ConfigParser.ConfigParser()
+config.read(settings)
 
+# Assign config variables
+OPENAI_MODEL = config.get('openai', 'MODEL')
+TRANSCRIPTION_HOST = config.get('display', 'DISPLAY_HOST')
+TRANSCRIPTION_PORT = config.get('display', 'DISPLAY_PORT')
+DEBUG_HOST = config.get('display', 'DEBUG_HOST')
+DEBUG_PORT = config.get('display', 'DEBUG_PORT')
+DEFAULT_PADDING_TOP = config.get('display', 'DEFAULT_PADDING_TOP')
+DEFAULT_PADDING_LEFT = config.get('display', 'DEFAULT_PADDING_LEFT')
+FONT_FILE = config.get('display', 'FONT')
+MAX_WORDS = config.get('display', 'MAX_WORDS')
+PAUSE_LENGTH = config.get('display', 'PAUSE_LENGTH')
+
+# Define some language codes
 SPEECH_EN = "en-US"
 SPEECH_CS = "cs-CZ"
-SPEECH_SK = "sk-SK"
+SPEECH_sk = "sk-SK"
 TEXT_EN = "en"
 TEXT_CS = "cs"
 TEXT_SK = "sk"
 
-# TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_HOST = "192.168.26.118"
-TRANSCRIPTION_PORT = 5000
-
-DEFAULT_PADDING_TOP = 40
-DEFAULT_PADDING_LEFT = 40
-
-# FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
-FONT_FILE = "./fonts/Newsreader_36pt-Medium.ttf"
-MAX_WORDS = 24
-
-PAUSE_LENGTH = 10 # If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
 
 class App:
     def __init__(self, speech_lang=SPEECH_EN, reset_pause=PAUSE_LENGTH):
@@ -56,7 +61,7 @@ class App:
         self.prev_text_buffer = ""
         self.text_buffer_window = ""
 
-        self.max_words = 24
+        self.max_words = MAX_WORDS
         self.window_wiped_flag = False
 
         self.trans_buffer = ""
@@ -76,13 +81,13 @@ class App:
         
         self.input_lang = "en"
         self.output_lang = "en"
-        self.model = "normal"
+        self.model = OPENAI_MODEL
 
         # Translation client
         self.translate_client = translate.Client()
 
         # GPT3 client
-        self.gpt3 = GPT3Client(self, self.translate_client, engine=DAVINCI)
+        self.gpt3 = GPT3Client(self, self.translate_client, engine=OPENAI_MODEL)
         self.gpt3_resp = ""
         
     def run(self):
@@ -106,7 +111,7 @@ class App:
             # Set Instruct
             if kw_dict.get("instruct"):
                 self.model = "instruct"
-                self.gpt3.set_engine(DAVINCI_BETA_INSTRUCT)
+                self.gpt3.set_engine(OPENAI_MODEL)
                 pred("Setting instruct")
                 self.dm.display_action("engine: Instruct")
                 time.sleep(1)
@@ -115,7 +120,7 @@ class App:
             # Set Normal
             if kw_dict.get("normal"):
                 self.model = "normal"
-                self.gpt3.set_engine(DAVINCI)
+                self.gpt3.set_engine(OPENAI_MODEL)
                 pred("Setting normal")
                 self.dm.display_action("engine: Normal")
                 time.sleep(1)
@@ -336,10 +341,10 @@ class App:
 
     def chop_endword(self, text):
         print("Chop endword text:", text)
-        kw_end = ["I'm out", "peace out"] if self.speech_lang != "cs-CZ" else ["díky", "jedeš"]
+        kw_end = ["I'm out"] if self.speech_lang != "cs-CZ" else ["díky"]
     
         if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
-            text = re.sub(rf"\b(díky|Díky|jedeš|Jedeš|I'm out|peace out|Peace out)\b", "", text)
+            text = re.sub(rf"\b(díky|Díky|I'm out)\b", "", text)
             text = text.strip()
             print("Matched, returning:", text)
             return text

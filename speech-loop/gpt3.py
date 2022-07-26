@@ -3,20 +3,27 @@ import time
 import openai
 import random
 import subprocess
+import ConfigParser
+
 from termcolor import colored
 from google.cloud import texttospeech
 
 import utils
 from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word
 
-ENGINE = "text-davinci-002"
-MAX_TOKENS = 200
-TEMPERATURE = 0.9
+# Load variables from config
+settings = os.path.join(sys.path[0], '../settings.ini')
+config = ConfigParser.ConfigParser()
+config.read(settings)
 
-MAX_SUCC_BLANKS = 3
+# Assign config variables
+OPENAI_MODEL = config.get('openai', 'MODEL')
+MAX_TOKENS_STORIES = config.get('openai', 'MAX_TOKENS_STORIES')
+TEMPERATURE_STORIES = config.get('openai', 'TEMPERATURE_STORIES')
+MAX_SUCC_BLANKS = config.get('openai', 'MAX_SUCC_BLANKS')
 
 class GPT3Client:
-    def __init__(self, app, translate_client, engine=ENGINE, input_lang="cs", output_speech_lang="cs-CZ"):
+    def __init__(self, app, translate_client, engine=OPENAI_MODEL, input_lang="cs", output_speech_lang="cs-CZ"):
         self.app = app
         self.engine = engine
         self.input_lang = input_lang
@@ -69,7 +76,7 @@ class GPT3Client:
             resp = openai.Completion.create(
                 engine=self.engine,
                 prompt=x,
-                max_tokens=MAX_TOKENS,
+                max_tokens=MAX_TOKENSS_STORIES,
                 temperature=TEMPERATURE,
             )
             end = time.time()
@@ -135,8 +142,12 @@ class GPT3Client:
         """
         synthesis_input = texttospeech.SynthesisInput(text=text)
         voice = texttospeech.VoiceSelectionParams(language_code=self.output_speech_lang)
+
+        # Plz note we are asking for speaking rate every time
+        config.read(settings)
+        SPEAKING_RATE = config.get('text-to-speech', 'SPEAKING_RATE')
         audio_config = texttospeech.AudioConfig(
-            speaking_rate=0.9, # 0.75, # 0.5 - 4.0
+            speaking_rate=SPEAKING_RATE, # 0.75, # 0.5 - 4.0
             effects_profile_id=['medium-bluetooth-speaker-class-device'],
             audio_encoding=texttospeech.AudioEncoding.MP3,
             pitch=0, # 20 for dying patient voice

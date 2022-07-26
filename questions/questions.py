@@ -8,6 +8,8 @@ import openai
 import socket
 import random
 import subprocess
+import configparser
+
 from playsound import playsound
 from google.cloud import speech
 from google.cloud import texttospeech
@@ -19,9 +21,31 @@ Seed = namedtuple("Seed", "title prompts")
 from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, cmagenta, ccyan, cyellow, cred
 from display_sender import DisplaySender
 
-IN_FILE_NAMES = "names.txt"
-SEEDS_DIR = "seeds"
+# Load variables from config
+settings = os.path.join(sys.path[0], '../settings.ini')
+config = ConfigParser.ConfigParser()
+config.read(settings)
 
+# Assign config variables - open ai
+OPENAI_MODEL = config.get('openai', 'MODEL')
+MAX_TOKENS_QUESTIONS = config.get('openai', 'MAX_TOKENS_QUESTIONS')
+TEMPERATURE = config.get('openai', 'TEMPERATURE_QUESTIONS')
+# display settings
+TRANSCRIPTION_HOST = config.get('display', 'DISPLAY_HOST')
+TRANSCRIPTION_PORT = config.get('display', 'DISPLAY_PORT')
+BIG_FONT_SIZE = config.get('display', 'BIG_FONT_SIZE')
+# question settings
+NAMES_FILE = config.get('questions', 'NAMES_FILE')
+SEEDS_DIR = config.get('questions', 'SEEDS_DIR')
+SECONDS_FOR_ENTRANCE = config.get('questions', 'SECONDS_FOR_ENTRANCE')
+STOCK_RESP_PROB = config.get('questions', 'STOCK_RESP_PROB')
+EN_QUESTION_PROB = config.get('questions', 'EN_QUESTION_PROB')
+MIN_Q_PER_P = config.get('questions', 'MIN_Q_PER_P')
+MAX_Q_PER_P = config.get('questions', 'MAX_Q_PER_P')
+SPEECH_MU = config.get('questions', 'SPEECH_MU')
+SPEECH_SIGMA = config.get('questions', 'SPEECH_SIGMA')
+
+# Define some language codes
 SPEECH_LANG = "cs-CZ"
 TEXT_TARGET_LANG = "en"
 OUTPUT_SPEECH_LANG = "cs-CZ"
@@ -29,12 +53,6 @@ OUTPUT_SPEECH_LANG = "en-GB"
 OUTPUT_LANG_CZ = "cs"
 OUTPUT_LANG_RU = 'ru'
 OUTPUT_LANG_SK = 'sk'
-
-ENGINE = "text-davinci-002"
-MAX_TOKENS = 150
-TEMPERATURE = 0.9
-
-SECONDS_FOR_ENTRANCE = 0
 
 STOCK_RESPONSES_CZ = [
     "Zajímavé.", 
@@ -68,23 +86,6 @@ STOCK_RESPONSES_EN = [
     "Thank you. That's enough.",
 ]
 
-
-STOCK_RESP_PROB = 50
-EN_QUESTION_PROB = 40
-
-TRANSCRIPTION_HOST = "192.168.26.118"
-#TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_PORT = 5000
-
-MIN_Q_PER_P = 1
-MAX_Q_PER_P = 3
-
-# Median and variance for answer duration
-SPEECH_MU = 20 
-SPEECH_SIGMA = 25
-
-RLY_BIG_FONT_SIZE = 333
-
 display = DisplaySender(
     TRANSCRIPTION_HOST,
     TRANSCRIPTION_PORT
@@ -106,7 +107,7 @@ def send_to_display_rly_big(msg):
         align="center",
         padding_left=40,
         padding_top=40,
-        font_size=RLY_BIG_FONT_SIZE,
+        font_size=BIG_FONT_SIZE,
     )
 
 client = texttospeech.TextToSpeechClient()
@@ -180,7 +181,7 @@ def generate_question(prompt):
     q = ""
     while len(q) < 1:
         gpt3_resp = openai.Completion.create(
-            engine=ENGINE,
+            engine=OPENAI_MODEL,
             prompt=prompt,
             temperature=0.9,
             max_tokens=64,
@@ -426,6 +427,12 @@ def part_two(names, seeds):
             lang = 'cz'
         if (name == 'Eliška'):
             lang = 'cz'
+        if (name == 'Eva'):
+            lang = 'cz'
+        if (name == 'Lucia'):
+            lang = 'sk'
+        if (name == 'Lenka'):
+            lang = 'sk'
         
         pyellow(f"Generating question for {name} in {lang}")
         question_person(name, prompt, lang)
@@ -438,7 +445,7 @@ def part_two(names, seeds):
 
 def main(part=1):
     # Load names
-    NAMES = [l.strip() for l in open(IN_FILE_NAMES, "r").readlines()]
+    NAMES = [l.strip() for l in open(NAMES_FILE, "r").readlines()]
     SEEDS = load_seeds()
     
     if part == 1:

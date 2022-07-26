@@ -1,0 +1,56 @@
+[display]
+# General display settings 
+
+DISPLAY_HOST = 
+DISPLAY_PORT = 
+DEBUG_HOST = 
+DEBUG_PORT = 
+
+# Design and style
+WIDTH = 1900
+HEIGHT = 1000
+DEFAULT_PADDING_TOP = 40
+DEFAULT_PADDING_ LEFT = 40
+PADDING_TOP = 100
+PADDING_LEFT = 80
+FONT = ./fonts/Newsreader_36pt-Medium.ttf
+FONT_SIZE = 72
+STATE_FONT_SIZE = 36
+BIG_FONT_SIZE = 333
+MAX_WORDS = 24
+
+# If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
+PAUSE_LENGTH = 10
+
+[speech-to-text]
+# Settings for real-time speech to text
+
+[text-to-speech]
+# Settings for real-time text to speech
+
+# Use 0.9 for output via speakers, and 0.7 for headphones
+SPEAKING_RATE = 0.9
+
+[questions]
+# Settings for questions.py
+
+NAMES_FILE = names.txt
+SEEDS_DIR = seeds
+SECONDS_FOR_ENTRANCE = 0
+STOCK_RESP_PROB = 50
+EN_QUESTION_PROB = 40
+MIN_Q_PER_P = 1
+MAX_Q_PER_P = 3
+# Median and variance for answer duration
+SPEECH_MU = 20
+SPEECH_SIGMA = 25
+
+[openai]
+# GPT-3 settings
+
+MODEL = text-davinci-002
+MAX_TOKENS_STORIES = 500
+MAX_TOKENS_QUESTIONS = 150
+TEMPERATURE_STORIES = 0.9
+TEMPERATURE_QUESTIONS = 0.9
+MAX_SUCC_BLANKS = 3
