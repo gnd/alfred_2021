@@ -27,23 +27,29 @@ from kw_parser import replace_punct, recognize_kws, INSTRUCT_RE, NORMAL_RE
 
 from gpt3 import GPT3Client
 
+# Load variables from config
+settings = os.path.join(sys.path[0], '../settings.ini')
+config = ConfigParser.ConfigParser()
+config.readfp(open(settings))
+
+# Assign config variables
+TRANSCRIPTION_HOST = config.get('display', 'DISPLAY_HOST')
+TRANSCRIPTION_PORT = config.get('display', 'DISPLAY_PORT')
+DEBUG_HOST = config.get('display', 'DEBUG_HOST')
+DEBUG_PORT = config.get('display', 'DEBUG_PORT')
+DEFAULT_PADDING_TOP = config.get('display', 'DEFAULT_PADDING_TOP')
+DEFAULT_PADDING_LEFT = config.get('display', 'DEFAULT_PADDING_LEFT')
+FONT_FILE = config.get('display', 'FONT')
+MAX_WORDS = config.get('display', 'MAX_WORDS')
+PAUSE_LENGTH = config.get('display', 'PAUSE_LENGTH')
+
+# Define some language codes
 SPEECH_EN = "en-US"
 SPEECH_CS = "cs-CZ"
+SPEECH_sk = "sk-SK"
 TEXT_EN = "en"
 TEXT_CS = "cs"
-
-#TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_PORT = 5000
-
-DEFAULT_PADDING_TOP = 40
-DEFAULT_PADDING_LEFT = 40
-
-# FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
-FONT_FILE = "./fonts/Newsreader_36pt-Medium.ttf"
-MAX_WORDS = 24
-
-PAUSE_LENGTH = 10 # If there is no mic input in `PAUSE_LENGTH` seconds, the display will be reset on subsequent input.
+TEXT_SK = "sk"
 
 class App:
     def __init__(self, speech_lang=SPEECH_CS, reset_pause=PAUSE_LENGTH):
@@ -51,7 +57,7 @@ class App:
         self.prev_text_buffer = ""
         self.text_buffer_window = ""
 
-        self.max_words = 24
+        self.max_words = MAX_WORDS
         self.window_wiped_flag = False
 
         self.trans_buffer = ""
@@ -233,11 +239,11 @@ class App:
         t.start()
 
     def chop_endword(self, text):
-        print("CHop endword text:", text)
-        kw_end = ["I'm out", "peace out"] if self.speech_lang != "cs-CZ" else ["díky", "jedeš"]
+        print("Chop endword text:", text)
+        kw_end = ["I'm out"] if self.speech_lang != "cs-CZ" else ["díky"]
     
         if re.search(rf"\b(.*)(({kw_end[0]})|({kw_end[1]}))\b", text, re.I):
-            text = re.sub(rf"\b(díky|Díky|jedeš|Jedeš|I'm out|peace out|Peace out)\b", "", text)
+            text = re.sub(rf"\b(díky|Díky|I'm out)\b", "", text)
             text = text.strip()
             print("Matched, returning:", text)
             return text

@@ -2,24 +2,31 @@ import fire
 import ptext
 import pygame
 import socket
+import configparser
+
 from msg_decoder import decode_msg 
 
-# set some globals
-# SCREEN_WIDTH = 3000
-# SCREEN_HEIGHT = 2000
-SCREEN_WIDTH = 1900
-SCREEN_HEIGHT = 1000
-# TODO - automaticaly detect wlan0 ip
-#DISPLAY_HOST = "192.168.217.207"
-DISPLAY_HOST = "127.0.0.1"
-DISPLAY_PORT = 5000
-PADDING_LEFT = 80 
-PADDING_TOP = 100
-ONCE = True
-FONT_SIZE = 72
-STATE_FONT_SIZE = 36
+# Load variables from config
+settings = os.path.join(sys.path[0], '../settings.ini')
+config = ConfigParser.ConfigParser()
+config.read(settings)
 
-FONT_FILE = "./fonts/Roboto-MediumItalic.ttf"
+# Assign config variables
+DISPLAY_HOST = config.get('display', 'DISPLAY_HOST')
+DISPLAY_PORT = config.get('display', 'DISPLAY_PORT')
+DEBUG_HOST = config.get('display', 'DEBUG_HOST')
+DEBUG_PORT = config.get('display', 'DEBUG_PORT')
+PADDING_TOP = config.get('display', 'PADDING_TOP')
+PADDING_LEFT = config.get('display', 'PADDING_LEFT')
+SCREEN_WIDTH = config.get('display', 'SCREEN_WIDTH')
+SCREEN_HEIGHT = config.get('display', 'SCREEN_HEIGHT')
+FONT_FILE = config.get('display', 'FONT')
+FONT_SIZE = config.get('display', 'FONT_SIZE')
+STATE_FONT_SIZE = config.get('display', 'STATE_FONT_SIZE')
+MAX_WORDS = config.get('display', 'MAX_WORDS')
+PAUSE_LENGTH = config.get('display', 'PAUSE_LENGTH')
+ONCE = True
+
 
 def main(port=DISPLAY_PORT, host=DISPLAY_HOST):
     # setup listening socket

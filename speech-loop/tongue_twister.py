@@ -15,6 +15,8 @@ import random
 import socket
 import threading
 import subprocess
+import ConfigParser
+
 from termcolor import colored
 from playsound import playsound
 from google.cloud import speech
@@ -28,10 +30,14 @@ from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, beep
 from display_sender import DisplaySender
 from display_manager import DisplayManager
 
-# TRANSCRIPTION_HOST = "127.0.0.1"
-TRANSCRIPTION_HOST = "192.168.26.118"
+# Load variables from config
+settings_file = os.path.join(sys.path[0], '../settings.ini')
+config = ConfigParser.ConfigParser()
+config.read(settings)
 
-TRANSCRIPTION_PORT = 5000
+# Assign config variables
+TRANSCRIPTION_HOST = config.get('display', 'DISPLAY_HOST')
+TRANSCRIPTION_PORT = config.get('display', 'DISPLAY_PORT')
 
 class TongueTwister:
     def __init__(self, speech_lang="en-US", exit_word="Showtime"):
