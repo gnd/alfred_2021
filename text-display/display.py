@@ -1,3 +1,5 @@
+import os
+import sys
 import fire
 import ptext
 import pygame
@@ -8,23 +10,23 @@ from msg_decoder import decode_msg
 
 # Load variables from config
 settings = os.path.join(sys.path[0], '../settings.ini')
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(settings)
 
 # Assign config variables
 DISPLAY_HOST = config.get('display', 'DISPLAY_HOST')
-DISPLAY_PORT = config.get('display', 'DISPLAY_PORT')
+DISPLAY_PORT = int(config.get('display', 'DISPLAY_PORT'))
 DEBUG_HOST = config.get('display', 'DEBUG_HOST')
-DEBUG_PORT = config.get('display', 'DEBUG_PORT')
-PADDING_TOP = config.get('display', 'PADDING_TOP')
-PADDING_LEFT = config.get('display', 'PADDING_LEFT')
-SCREEN_WIDTH = config.get('display', 'SCREEN_WIDTH')
-SCREEN_HEIGHT = config.get('display', 'SCREEN_HEIGHT')
+DEBUG_PORT = int(config.get('display', 'DEBUG_PORT'))
+PADDING_TOP = int(config.get('display', 'PADDING_TOP'))
+PADDING_LEFT = int(config.get('display', 'PADDING_LEFT'))
+SCREEN_WIDTH = int(config.get('display', 'SCREEN_WIDTH'))
+SCREEN_HEIGHT = int(config.get('display', 'SCREEN_HEIGHT'))
 FONT_FILE = config.get('display', 'FONT')
-FONT_SIZE = config.get('display', 'FONT_SIZE')
-STATE_FONT_SIZE = config.get('display', 'STATE_FONT_SIZE')
-MAX_WORDS = config.get('display', 'MAX_WORDS')
-PAUSE_LENGTH = config.get('display', 'PAUSE_LENGTH')
+FONT_SIZE = int(config.get('display', 'FONT_SIZE'))
+STATE_FONT_SIZE = int(config.get('display', 'STATE_FONT_SIZE'))
+MAX_WORDS = int(config.get('display', 'MAX_WORDS'))
+PAUSE_LENGTH = int(config.get('display', 'PAUSE_LENGTH'))
 ONCE = True
 
 
