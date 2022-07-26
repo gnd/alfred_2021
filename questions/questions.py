@@ -23,27 +23,27 @@ from display_sender import DisplaySender
 
 # Load variables from config
 settings = os.path.join(sys.path[0], '../settings.ini')
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read(settings)
 
 # Assign config variables - open ai
 OPENAI_MODEL = config.get('openai', 'MODEL')
-MAX_TOKENS_QUESTIONS = config.get('openai', 'MAX_TOKENS_QUESTIONS')
-TEMPERATURE = config.get('openai', 'TEMPERATURE_QUESTIONS')
+MAX_TOKENS_QUESTIONS = int(config.get('openai', 'MAX_TOKENS_QUESTIONS'))
+TEMPERATURE_QUESTIONS = float(config.get('openai', 'TEMPERATURE_QUESTIONS'))
 # display settings
 TRANSCRIPTION_HOST = config.get('display', 'DISPLAY_HOST')
-TRANSCRIPTION_PORT = config.get('display', 'DISPLAY_PORT')
-BIG_FONT_SIZE = config.get('display', 'BIG_FONT_SIZE')
+TRANSCRIPTION_PORT = int(config.get('display', 'DISPLAY_PORT'))
+BIG_FONT_SIZE = int(config.get('display', 'BIG_FONT_SIZE'))
 # question settings
 NAMES_FILE = config.get('questions', 'NAMES_FILE')
 SEEDS_DIR = config.get('questions', 'SEEDS_DIR')
-SECONDS_FOR_ENTRANCE = config.get('questions', 'SECONDS_FOR_ENTRANCE')
-STOCK_RESP_PROB = config.get('questions', 'STOCK_RESP_PROB')
-EN_QUESTION_PROB = config.get('questions', 'EN_QUESTION_PROB')
-MIN_Q_PER_P = config.get('questions', 'MIN_Q_PER_P')
-MAX_Q_PER_P = config.get('questions', 'MAX_Q_PER_P')
-SPEECH_MU = config.get('questions', 'SPEECH_MU')
-SPEECH_SIGMA = config.get('questions', 'SPEECH_SIGMA')
+SECONDS_FOR_ENTRANCE = int(config.get('questions', 'SECONDS_FOR_ENTRANCE'))
+STOCK_RESP_PROB = float(config.get('questions', 'STOCK_RESP_PROB'))
+EN_QUESTION_PROB = float(config.get('questions', 'EN_QUESTION_PROB'))
+MIN_Q_PER_P = int(config.get('questions', 'MIN_Q_PER_P'))
+MAX_Q_PER_P = int(config.get('questions', 'MAX_Q_PER_P'))
+SPEECH_MU = int(config.get('questions', 'SPEECH_MU'))
+SPEECH_SIGMA = int(config.get('questions', 'SPEECH_SIGMA'))
 
 # Define some language codes
 SPEECH_LANG = "cs-CZ"
