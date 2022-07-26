@@ -16,8 +16,6 @@ config.read(settings)
 # Assign config variables
 DISPLAY_HOST = config.get('display', 'DISPLAY_HOST')
 DISPLAY_PORT = int(config.get('display', 'DISPLAY_PORT'))
-DEBUG_HOST = config.get('display', 'DEBUG_HOST')
-DEBUG_PORT = int(config.get('display', 'DEBUG_PORT'))
 PADDING_TOP = int(config.get('display', 'PADDING_TOP'))
 PADDING_LEFT = int(config.get('display', 'PADDING_LEFT'))
 SCREEN_WIDTH = int(config.get('display', 'SCREEN_WIDTH'))

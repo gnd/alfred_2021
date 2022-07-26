@@ -3,8 +3,6 @@
 
 DISPLAY_HOST = 
 DISPLAY_PORT = 
-DEBUG_HOST = 
-DEBUG_PORT = 
 
 # Design and style
 SCREEN_WIDTH = 1900
