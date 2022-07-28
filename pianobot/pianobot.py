@@ -92,6 +92,33 @@ def noteoff(pin):
     pin = translate_notes(pin)
     print("PIN OFF: {}".format(pin))
     GPIO.output(pin, GPIO.LOW)
+
+def allon():
+    GPIO.output(sol_01, GPIO.HIGH)
+    GPIO.output(sol_02, GPIO.HIGH)
+    GPIO.output(sol_03, GPIO.HIGH)
+    GPIO.output(sol_04, GPIO.HIGH)
+    GPIO.output(sol_05, GPIO.HIGH)
+    GPIO.output(sol_06, GPIO.HIGH)
+    GPIO.output(sol_07, GPIO.HIGH)
+    GPIO.output(sol_08, GPIO.HIGH)
+    GPIO.output(sol_09, GPIO.HIGH)
+    GPIO.output(sol_10, GPIO.HIGH)
+    GPIO.output(sol_11, GPIO.HIGH)
+    GPIO.output(sol_12, GPIO.HIGH)
+    sleep(0.5)
+    GPIO.output(sol_01, GPIO.LOW)
+    GPIO.output(sol_02, GPIO.LOW)
+    GPIO.output(sol_03, GPIO.LOW)
+    GPIO.output(sol_04, GPIO.LOW)
+    GPIO.output(sol_05, GPIO.LOW)
+    GPIO.output(sol_06, GPIO.LOW)
+    GPIO.output(sol_07, GPIO.LOW)
+    GPIO.output(sol_08, GPIO.LOW)
+    GPIO.output(sol_09, GPIO.LOW)
+    GPIO.output(sol_10, GPIO.LOW)
+    GPIO.output(sol_11, GPIO.LOW)
+    GPIO.output(sol_12, GPIO.LOW)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -122,6 +149,9 @@ if __name__ == "__main__":
     cycle_pin(sol_10, 0.5)
     cycle_pin(sol_11, 0.5)
     cycle_pin(sol_12, 0.5)
+    for i in range(3):
+        allon()
+        sleep(0.5)
 
     # Periodically call osc4py3 processing method in your event loop.
     finished = False
