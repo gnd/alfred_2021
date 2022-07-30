@@ -21,6 +21,8 @@ Seed = namedtuple("Seed", "title prompts")
 from utils import pblue, pred, pgreen, pcyan, pmagenta, pyellow, prainbow, cmagenta, ccyan, cyellow, cred
 from display_sender import DisplaySender
 
+from voice_fx import *
+
 # Load variables from config
 settings = os.path.join(sys.path[0], '../settings.ini')
 config = configparser.ConfigParser()
@@ -44,6 +46,11 @@ MIN_Q_PER_P = int(config.get('questions', 'MIN_Q_PER_P'))
 MAX_Q_PER_P = int(config.get('questions', 'MAX_Q_PER_P'))
 SPEECH_MU = int(config.get('questions', 'SPEECH_MU'))
 SPEECH_SIGMA = int(config.get('questions', 'SPEECH_SIGMA'))
+# voice effects
+AUDIO_FNAME = config.get("voice-effects", "AUDIO_FNAME")
+AUDIO_FX_FNAME = config.get("voice-effects", "AUDIO_FX_FNAME")
+P1_DELAY_ON_NAME = config.get("voice-effects", "P1_DELAY_ON_NAME")
+P2_GRADUAL_DECAY = config.get("voice-effects", "P2_GRADUAL_DECAY")
 
 # Define some language codes
 SPEECH_LANG = "cs-CZ"
@@ -139,7 +146,7 @@ def cut_to_sentence_end(text):
 def pick_voice_randomly():
     return random.choice([texttospeech.SsmlVoiceGender.MALE, texttospeech.SsmlVoiceGender.FEMALE])
 
-def text_to_speech(text, lang=OUTPUT_SPEECH_LANG):
+def text_to_speech(text, lang=OUTPUT_SPEECH_LANG, is_use_fx=False, fx_board=None):
     # Set the text input to be synthesized
 
     # Add emphasis randomly
@@ -156,21 +163,25 @@ def text_to_speech(text, lang=OUTPUT_SPEECH_LANG):
 
     audio_config = texttospeech.AudioConfig(
         effects_profile_id=['medium-bluetooth-speaker-class-device'],
-        audio_encoding=texttospeech.AudioEncoding.MP3,
+        audio_encoding=texttospeech.AudioEncoding.LINEAR16,
     )
 
     response = client.synthesize_speech(
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
 
-    fname = "output.mp3"
+    fname = AUDIO_FNAME
     # The response's audio_content is binary.
     with open(fname, "wb") as out:
         # Write the response to the output file.
         out.write(response.audio_content)
 
+    if is_use_fx and fx_board is not None:
+        apply_fx(fx_board, AUDIO_FNAME, AUDIO_FX_FNAME)
+
+    fname = AUDIO_FX_FNAME if is_use_fx and fx_board is not None else AUDIO_FNAME
     subprocess.run(
-        ["mplayer", "output.mp3"],
+        ["mplayer", fname],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL
     )
@@ -215,42 +226,50 @@ def translate_question(q, lang):
     print("Translation done...")
     return out
 
-def question_me(prompt, lang):
+def question_me(prompt, lang, fx_board=None):
     q_en = normalize_text(generate_question(prompt))
-    # TODO - isnt triple translation too slow ? 
-    q_cs = translate_question(q_en, 'cz')
-#    q_ru = translate_question(q_en, 'ru')
     q_sk = translate_question(q_en, 'sk')
-    send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
+
+    send_to_display(q_en.strip() + "\n\n" + q_sk.strip())
     pcyan(q_en)
-    if lang == 'cz':
-        text_to_speech(q_cs, "cs-CZ")
+
+    is_use_fx = True if fx_board is not None else False
+
     if lang == 'en':
-        text_to_speech(q_en, "en-GB")
+        text_to_speech(q_en, "en-GB", is_use_fx, fx_board)
+    if lang == 'cz':
+        q_cs = translate_question(q_en, 'cz')
+        text_to_speech(q_cs, "cs-CZ", is_use_fx, fx_board)
     if lang == 'ru':
-        text_to_speech(q_ru, "ru-RU")
+        q_ru = translate_question(q_en, 'ru')
+        text_to_speech(q_ru, "ru-RU", is_use_fx, fx_board)
     if lang == 'sk':
-        text_to_speech(q_sk, "sk-SK")
-    
-def question_person(name, prompt, lang):
+        text_to_speech(q_sk, "sk-SK", is_use_fx, fx_board)
+
+def question_person(name, prompt, lang, fx_board=None):
     q_en = normalize_text(generate_question(prompt))
+
     if len(q_en) > 0:
         q_en = q_en[0].lower() + q_en[1:]
-    q_en =name + ", " + q_en 
-    # TODO - triple translation
-    q_cs = translate_question(q_en, 'cz')
-#    q_ru = translate_question(q_en, 'ru')
+    q_en =name + ", " + q_en
+
     q_sk = translate_question(q_en, 'sk')
+
+    send_to_display(q_en.strip() + "\n\n" + q_sk.strip())
     pcyan(q_en)
-    send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
+
+    is_use_fx = True if fx_board is not None else False
+
     if lang == 'cz':
-        text_to_speech(q_cs, 'cs-CZ')
+        q_cs = translate_question(q_en, 'cz')
+        text_to_speech(q_cs, 'cs-CZ', is_use_fx, fx_board)
     if lang == 'en':
-        text_to_speech(q_en, 'en-GB')
+        text_to_speech(q_en, 'en-GB', is_use_fx, fx_board)
     if lang == 'ru':
-        text_to_speech(q_ru, 'ru-RU')
+        q_ru = translate_question(q_en, 'ru')
+        text_to_speech(q_ru, 'ru-RU', is_use_fx, fx_board)
     if lang == 'sk':
-        text_to_speech(q_sk, 'sk-SK')
+        text_to_speech(q_sk, 'sk-SK', is_use_fx, fx_board)
 
 def gen_num_q():
     return random.randint(MIN_Q_PER_P, MAX_Q_PER_P)
@@ -263,10 +282,17 @@ def gen_q_pause():
     # return 0
     return p
 
-def question_specific_person(name, seeds, lang):
+def question_specific_person(name, seeds, lang, hell_voice=False):
+    # This block of code formats and displays the name of the
+    # questined person multiple times with a big font on the
+    # screen.
     name_text = "\n".join([4*("".join([3*name.upper() + " "]))])
     send_to_display_rly_big(name_text)
-    text_to_speech(random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".", "cs-CZ")
+    text_to_speech(
+        text=random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".",
+        lang="cs-CZ",
+        is_use_fx=P1_DELAY_ON_NAME,
+        fx_board=b_delay)
 
     for x in range(SECONDS_FOR_ENTRANCE):
         sys.stdout.write(cyellow(f"Asking question in {SECONDS_FOR_ENTRANCE - x}\r"))
@@ -282,7 +308,11 @@ def question_specific_person(name, seeds, lang):
     prompt = get_prompt(seed)
     
     pmagenta("Generating question...")
-    question_me(prompt, lang)
+
+    if hell_voice and num_question == 1:
+        question_me(prompt, lang, fx_board=b_hell)
+    else:
+        question_me(prompt, lang)
 
     pmagenta("Giving time to answer...")
     time.sleep(gen_q_pause())
@@ -300,7 +330,12 @@ def question_specific_person(name, seeds, lang):
         
         prompt = get_prompt(seed)
         pmagenta("Generating question...")
-        question_me(prompt, lang)
+
+        if hell_voice and x == num_question - 2:
+            question_me(prompt, lang, fx_board=b_hell)
+        else:
+            question_me(prompt, lang)
+        
         pmagenta("Giving time to answer...")
         time.sleep(gen_q_pause())
 
@@ -373,6 +408,11 @@ def log_seeds(seeds):
 def part_one(names, seeds):
     cmd = ""
     idx = 0
+
+    # If enabled reads the question in a robotic voice from robot hell
+    # used as a surprise
+    hell_voice = False
+
     while cmd != "q":
         # Determine language first based on OUTPUT_SPEECH_LANG
         if OUTPUT_SPEECH_LANG == 'cs-CZ':
@@ -388,16 +428,24 @@ def part_one(names, seeds):
             lang = "ru"
         if cmd == "s":
             lang = "sk"
+        if cmd == "hell":
+            hell_voice = True
         if idx % len(names) == 0:
             idx = 0
             random.shuffle(names) # Shuffle names randomly
         name = names[idx]
         print_people(names, idx) # Prints order and currently questioned person.
         idx = idx + 1
-        cmd = question_specific_person(name, seeds, lang)
+        cmd = question_specific_person(name, seeds, lang, hell_voice=hell_voice)
+        
+        # Disable hell voice after usage
+        if hell_voice:
+            hell_voice = False
 
 def part_two(names, seeds):
     idx = 0
+    distort_count = 0
+
     while True:
         if idx % len(names) == 0:
             idx = 0
@@ -435,7 +483,12 @@ def part_two(names, seeds):
             lang = 'sk'
         
         pyellow(f"Generating question for {name} in {lang}")
-        question_person(name, prompt, lang)
+
+        if P2_GRADUAL_DECAY:
+            question_person(name, prompt, lang, make_b_decay(distort_count))
+            distort_count = distort_count + 1
+        else:
+            question_person(name, prompt, lang)
 
         # wait
         sleep_time = random.randint(1, 15)
@@ -446,6 +499,7 @@ def part_two(names, seeds):
 def main(part=1):
     # Load names
     NAMES = [l.strip() for l in open(NAMES_FILE, "r").readlines()]
+    # Load seeds
     SEEDS = load_seeds()
     
     if part == 1:

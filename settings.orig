@@ -52,3 +52,11 @@ MAX_TOKENS_QUESTIONS = 150
 TEMPERATURE_STORIES = 0.9
 TEMPERATURE_QUESTIONS = 0.9
 MAX_SUCC_BLANKS = 3
+
+[voice-effects]
+# Settings for voice effects used in the `questions` scene
+
+AUDIO_FNAME = output.wav
+AUDIO_FX_FNAME = output_fx.wav
+P1_DELAY_ON_NAME = True
+P2_GRADUAL_DECAY = True
