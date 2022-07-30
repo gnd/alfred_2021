@@ -161,7 +161,11 @@ def text_to_speech(text, lang=OUTPUT_SPEECH_LANG, is_use_fx=False, fx_board=None
         language_code=lang, ssml_gender=pick_voice_randomly()
     )
 
+    config.read(settings)
+    SPEAKING_RATE = float(config.get('text-to-speech', 'SPEAKING_RATE'))
+
     audio_config = texttospeech.AudioConfig(
+        speaking_rate=SPEAKING_RATE, # 0.75, # 0.5 - 4.0
         effects_profile_id=['medium-bluetooth-speaker-class-device'],
         audio_encoding=texttospeech.AudioEncoding.LINEAR16,
     )
@@ -288,8 +292,9 @@ def question_specific_person(name, seeds, lang, hell_voice=False):
     # screen.
     name_text = "\n".join([4*("".join([3*name.upper() + " "]))])
     send_to_display_rly_big(name_text)
+
     text_to_speech(
-        text=random.choice(["Hey, <break time=\"500ms\"/>"]) + " " + name + ".",
+        text="Hey, " + name,
         lang="cs-CZ",
         is_use_fx=P1_DELAY_ON_NAME,
         fx_board=b_delay)
@@ -428,7 +433,7 @@ def part_one(names, seeds):
             lang = "ru"
         if cmd == "s":
             lang = "sk"
-        if cmd == "hell":
+        if cmd == "h":
             hell_voice = True
         if idx % len(names) == 0:
             idx = 0
