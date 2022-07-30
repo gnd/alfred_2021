@@ -59,10 +59,10 @@ def text_to_crowns(text):
 def text_to_eur(text):
     """Apply GPT-3 pricing on the text and return the approximate price in euros crowns."""
     tokens = len(text) / CHARS_PER_TOK
-    return tokens * USD_PER_1000_TOKS / 1000 * EUR_PER_USD
+    return round(tokens * USD_PER_1000_TOKS / 1000 * EUR_PER_USD, 4)
 
 def text_coda(text):
-    return f'\nThis text cost {text_to_eur(text)} EUR.'
+    return f'{text_to_eur(text)} EUR'
 
 def recognize_stop_word(text):
     if re.search(r"\b(exit)\b", text, re.I):
