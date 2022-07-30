@@ -7,6 +7,7 @@ from kw_parser import replace_punct
 
 CHARS_PER_TOK = 4
 CZK_PER_USD = 21.93
+EUR_PER_USD = 0.98
 USD_PER_1000_TOKS = 0.06 # for Davinci
 
 # Logging functions
@@ -55,8 +56,13 @@ def text_to_crowns(text):
     tokens = len(text) / CHARS_PER_TOK
     return tokens * USD_PER_1000_TOKS / 1000 * CZK_PER_USD
 
+def text_to_eur(text):
+    """Apply GPT-3 pricing on the text and return the approximate price in euros crowns."""
+    tokens = len(text) / CHARS_PER_TOK
+    return tokens * USD_PER_1000_TOKS / 1000 * EUR_PER_USD
+
 def text_coda(text):
-    return f'\nThis text cost {text_to_crowns(text)} crowns.'
+    return f'\nThis text cost {text_to_eur(text)} EUR.'
 
 def recognize_stop_word(text):
     if re.search(r"\b(exit)\b", text, re.I):

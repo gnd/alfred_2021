@@ -10,7 +10,7 @@ from termcolor import colored
 from google.cloud import texttospeech
 
 import utils
-from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word
+from utils import pblue, pred, pgreen, pcyan, pyellow, prainbow, beep, concat, sanitize_translation, elapsed_time, normalize_text, recognize_stop_word, text_coda
 
 # Load variables from config
 settings = os.path.join(sys.path[0], '../settings.ini')
@@ -127,7 +127,8 @@ class GPT3Client:
                 f'   {len(y)} chars clean',
                 "   {:.3f} tokens clean".format(len(y) / 4),
                 "   {:.3f} tokens total".format((len(y) + len(x)) / 4),
-                f"   {len(y.split())} words"
+                f"   {len(y.split())} words",
+                f"  {text_coda(y)}"
             ]))
 
         self.play_audio()

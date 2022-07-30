@@ -314,7 +314,7 @@ class App:
         # TODO - add to config
         if self.speech_lang == SPEECH_CS:
             target_language = TEXT_EN
-        if self.speech_lang == SPEECH_SK:
+        elif self.speech_lang == SPEECH_SK:
             target_language = TEXT_EN
         else:
             target_language = TEXT_CS
