@@ -476,8 +476,6 @@ def part_two(names, seeds):
         # Also generate question in Czech for Anastazia, Eliska and Lenka
         if (name == 'Anastázia'):
             lang = 'cz'
-        if (name == 'Lenka'):
-            lang = 'cz'
         if (name == 'Eliška'):
             lang = 'cz'
         if (name == 'Eva'):
