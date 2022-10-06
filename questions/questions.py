@@ -232,9 +232,10 @@ def translate_question(q, lang):
 
 def question_me(prompt, lang, fx_board=None):
     q_en = normalize_text(generate_question(prompt))
-    q_sk = translate_question(q_en, 'sk')
+    # q_sk = translate_question(q_en, 'sk')
+    q_cs = translate_question(q_en, 'cz')
 
-    send_to_display(q_en.strip() + "\n\n" + q_sk.strip())
+    send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     pcyan(q_en)
 
     is_use_fx = True if fx_board is not None else False
@@ -242,7 +243,7 @@ def question_me(prompt, lang, fx_board=None):
     if lang == 'en':
         text_to_speech(q_en, "en-GB", is_use_fx, fx_board)
     if lang == 'cz':
-        q_cs = translate_question(q_en, 'cz')
+        # q_cs = translate_question(q_en, 'cz')
         text_to_speech(q_cs, "cs-CZ", is_use_fx, fx_board)
     if lang == 'ru':
         q_ru = translate_question(q_en, 'ru')
@@ -257,15 +258,17 @@ def question_person(name, prompt, lang, fx_board=None):
         q_en = q_en[0].lower() + q_en[1:]
     q_en =name + ", " + q_en
 
-    q_sk = translate_question(q_en, 'sk')
+    # q_sk = translate_question(q_en, 'sk')
+    q_cs = translate_question(q_en, 'cz')
 
-    send_to_display(q_en.strip() + "\n\n" + q_sk.strip())
+    # send_to_display(q_en.strip() + "\n\n" + q_sk.strip())
+    send_to_display(q_en.strip() + "\n\n" + q_cs.strip())
     pcyan(q_en)
 
     is_use_fx = True if fx_board is not None else False
 
     if lang == 'cz':
-        q_cs = translate_question(q_en, 'cz')
+        # q_cs = translate_question(q_en, 'cz')
         text_to_speech(q_cs, 'cs-CZ', is_use_fx, fx_board)
     if lang == 'en':
         text_to_speech(q_en, 'en-GB', is_use_fx, fx_board)
@@ -480,18 +483,19 @@ def part_two(names, seeds):
             lang = 'cz'
         if (name == 'Eva'):
             lang = 'cz'
-        if (name == 'Lucia'):
-            lang = 'sk'
+        # if (name == 'Lucia'):
+        #     lang = 'sk'
         if (name == 'Lenka'):
-            lang = 'sk'
+            lang = 'cz'
         
         pyellow(f"Generating question for {name} in {lang}")
 
-        if P2_GRADUAL_DECAY:
-            question_person(name, prompt, lang, make_b_decay(distort_count))
-            distort_count = distort_count + 1
-        else:
-            question_person(name, prompt, lang)
+        # if P2_GRADUAL_DECAY:
+        #     question_person(name, prompt, lang, make_b_decay(distort_count))
+        #     distort_count = distort_count + 1
+        # else:
+        #     question_person(name, prompt, lang)
+        question_person(name, prompt, lang)
 
         # wait
         sleep_time = random.randint(1, 15)
