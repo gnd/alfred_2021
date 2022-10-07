@@ -12,13 +12,15 @@ GPIO.setmode(GPIO.BOARD)
 
 # device IP
 # on gnd's network
-RPI_IP="192.168.26.168"
+#RPI_IP="192.168.198.168"
 # on Kafkarna's network
 #RPI_IP="10.0.0.44"
+# on Alfred's network
+RPI_IP="192.168.1.105"
 
 # define solenoid 01 - solenoid 12 pins
 sol_01 = 37
-sol_02 = 35
+sol_02 = 32
 sol_03 = 36
 sol_04 = 31
 sol_05 = 29
@@ -85,12 +87,12 @@ def translate_notes(pin):
     
 def noteon(pin):
     pin = translate_notes(pin)
-    print("PIN ON: {}".format(pin))
+    #print("PIN ON: {}".format(pin))
     GPIO.output(pin, GPIO.HIGH)
 
 def noteoff(pin):
     pin = translate_notes(pin)
-    print("PIN OFF: {}".format(pin))
+    #print("PIN OFF: {}".format(pin))
     GPIO.output(pin, GPIO.LOW)
 
 def allon():
