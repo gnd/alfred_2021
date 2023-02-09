@@ -55,7 +55,7 @@ TEXT_SK = "sk"
 
 
 class App:
-    def __init__(self, speech_lang=SPEECH_CS, reset_pause=PAUSE_LENGTH):
+    def __init__(self, speech_lang=SPEECH_EN, reset_pause=PAUSE_LENGTH):
         self.text_buffer = ""
         self.prev_text_buffer = ""
         self.text_buffer_window = ""

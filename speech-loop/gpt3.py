@@ -24,7 +24,7 @@ TEMPERATURE_STORIES = float(config.get('openai', 'TEMPERATURE_STORIES'))
 MAX_SUCC_BLANKS = int(config.get('openai', 'MAX_SUCC_BLANKS'))
 
 class GPT3Client:
-    def __init__(self, app, translate_client, engine=OPENAI_MODEL, input_lang="cs", output_speech_lang="cs-CZ"):
+    def __init__(self, app, translate_client, engine=OPENAI_MODEL, input_lang="en", output_speech_lang="en-US"):
         self.app = app
         self.engine = engine
         self.input_lang = input_lang
